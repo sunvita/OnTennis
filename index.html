@@ -190,7 +190,7 @@ const NAMES=[["제노","Jeno",4],["창동","Changdong",3],["진우","Jinwoo",3],
 const S={lang:'ko',step:0,
  players:NAMES.map((n,i)=>({id:i,ko:n[0],en:n[1],level:n[2],sel:true,start:300,custom:false})),nextId:100,
  nCourts:3,nRounds:7,types:['doubles','doubles','doubles','doubles'],avail:[],
- history:[],levelLog:[],draws:[],operator:'',saveDate:new Date().toISOString().slice(0,10),drawId:0,rc:{mode:'last',n:10,month:new Date().toISOString().slice(0,7),from:'',to:'',min:5},startMin:240,endMin:420,roundLenA:30,roundLenB:25,scoring:'ss1',games:6,levelMode:'on',rotate:true,avoidOpp:true,fair:true,club:'Tennis On',title:'',
+ history:[],levelLog:[],draws:[],operator:'',saveDate:new Date().toISOString().slice(0,10),drawId:0,rc:{mode:'last',n:10,month:new Date().toISOString().slice(0,7),from:'',to:'',min:5},startMin:240,endMin:420,roundLenA:30,roundLenB:25,scoring:'ss1',games:5,levelMode:'on',rotate:true,avoidOpp:true,fair:true,club:'On Tennis',title:'',
  draw:null,scores:{},notesCustom:{ko:null,en:null}};
 const CFG=window.TENNIS_CFG||{};
 const cloud={on:!!(CFG.url&&CFG.key),st:'off',timer:null,applying:false,last:'',busy:false,q:Promise.resolve(),n:0};
@@ -447,6 +447,13 @@ function ratingStats(id){
 }
 
 /* ---------- sheet ---------- */
+function clubHTML(){
+  const w=(S.club||'').trim().split(/\s+/).filter(Boolean);
+  const two=w.length>=3,mid=Math.ceil(w.length/2);
+  const lines=two?[w.slice(0,mid).join(' '),w.slice(mid).join(' ')]:[w.join(' ')];
+  const fs=two?34:44;
+  return `<div style="display:flex;align-items:center;gap:8px"><div style="font:italic 900 ${fs}px/1.1 'Noto Sans KR',serif;color:#12296b;text-align:center;min-width:170px">${lines.map(esc).join('<br>')}</div><img src="${IMG.racket}" alt="" style="height:120px"></div>`;
+}
 function sheetHTML(){
   const L=t(),sel=selPlayers();
   const nm=a=>a.map(id=>esc(pname(byId(id)))).join(' · ');
@@ -474,7 +481,7 @@ function sheetHTML(){
   <div class="sh-head"><img src="${IMG.player}" alt=""><div class="sh-tb"><div class="sh-title">${esc(title)}</div><div class="sh-sub">${L.subFmt(S.nCourts,S.nRounds,L.ss[S.scoring])}</div></div><img src="${IMG.racket}" alt=""></div>
   <div class="sh-info"><div class="lab">${L.part(sel.length)}</div><div class="box"><span>${sel.map(p=>esc(pname(p))+'').join(', ')}</span></div><div class="lab">${L.method}</div><div class="box">${L.ss[S.scoring]} · ${L.gw(S.games,S.scoring==='ss3')}</div></div>
   ${g}
-  <div class="sh-foot"><div class="bl"><img src="${IMG.ball}" alt=""><b>${L.notesH}</b></div><ul>${notesFor().map(n=>`<li>${esc(n)}</li>`).join('')}</ul><div class="lg">${S.club==='Tennis On'?`<img src="${IMG.logo}" alt="">`:`<div style="font:italic 900 38px 'Noto Sans KR',serif;color:#12296b;text-align:center;padding:0 10px">${esc(S.club)}</div>`}</div></div>
+  <div class="sh-foot"><div class="bl"><img src="${IMG.ball}" alt=""><b>${L.notesH}</b></div><ul>${notesFor().map(n=>`<li>${esc(n)}</li>`).join('')}</ul><div class="lg">${clubHTML()}</div></div>
   </div>`;
 }
 
