@@ -530,12 +530,12 @@ function renderPanel(){
   const L=t(),n=selPlayers().length;let h='';
   if(S.step===0){
     h=`<div class="card"><h2>${L.p_h}</h2><p class="hint">${L.p_hint}</p>
-    <div class="row"><b>${n} ${L.selected}</b><span class="chip early">${L.earlyCnt(fmtT(S.startMin),selPlayers().filter(p=>p.start<=S.startMin).length)}</span><span class="chip later">${L.laterCnt(selPlayers().filter(p=>p.start>S.startMin).length)}</span><button class="btn" onclick="selAll(true)">${L.all}</button><button class="btn" onclick="selAll(false)">${L.none}</button></div>
+    <div class="row"><b>${n} ${L.selected}</b><span class="chip early">${L.earlyCnt(fmtT(S.startMin),selPlayers().filter(p=>p.start<=S.startMin).length)}</span><span class="chip later">${L.laterCnt(selPlayers().filter(p=>p.start>S.startMin).length)}</span></div>
     <div class="row"><label>${L.sessionStart}</label><select onchange="setSessionStart(this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${timeOpts(S.startMin)}</select>
     <label style="min-width:auto;margin-left:10px">${L.endTime}</label><select onchange="setEnd(this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${timeOpts(S.endMin)}</select></div>
     <div class="row"><label>${L.lenBefore}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenA,'setLenA')}<label style="min-width:auto;margin-left:10px">${L.lenAfter}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenB,'setLenB')}</div>
     <p class="note" style="margin:0 0 10px">${L.rounds}: <b>${S.nRounds}</b> · ${L.roundsAuto} ${L.lateHint}</p>
-    <div class="row"><input type="text" id="plSearch" placeholder="${L.searchPh}" value="${esc(UI.plQuery)}" oninput="UI.plQuery=this.value;refreshPlayers()" style="min-width:200px;flex:1">${seg([['none',L.sortOrder],['asc',L.sortAsc],['desc',L.sortDesc]],UI.plSort,'setSort')}<span class="note" id="plCount"></span></div>
+    <div class="row"><button class="btn" onclick="selAll(true)">${L.all}</button><button class="btn" onclick="selAll(false)">${L.none}</button><input type="text" id="plSearch" placeholder="${L.searchPh}" value="${esc(UI.plQuery)}" oninput="UI.plQuery=this.value;refreshPlayers()" style="min-width:200px;flex:1">${seg([['none',L.sortOrder],['asc',L.sortAsc],['desc',L.sortDesc]],UI.plSort,'setSort')}<span class="note" id="plCount"></span></div>
     <div class="pl" id="plList">${playerCards()}</div>
     <h3 style="margin:20px 0 0;font-size:15px">${L.newPlayer}</h3>
     <div class="row" style="margin-top:6px"><input type="text" id="newKo" placeholder="${L.nameKo}"><input type="text" id="newEn" placeholder="${L.nameEn}"><select id="newLv" style="padding:8px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${lvOpts(0)}</select><button class="btn" onclick="addP()">＋ ${L.add}</button></div></div>`;
