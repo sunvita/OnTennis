@@ -526,7 +526,7 @@ function renderPanel(){
       <select onclick="event.stopPropagation()" onchange="setLv(${p.id},this.value)">${lvOpts(p.level)}</select>${(()=>{const q=ratingStats(p.id);return q.sug!=null&&q.sug!==p.level?`<button class="x" style="color:var(--acc);font-size:12px" title="${L.apply}" onclick="event.stopPropagation();applyLv(${p.id},${q.sug})">(${L.sug} ${q.sug})</button>`:''})()}
       <select class="tsel" title="${L.startAt}" onclick="event.stopPropagation()" onchange="setStart(${p.id},this.value)">${timeOpts(p.start)}</select>
       ${p.custom?`<button class="x" onclick="event.stopPropagation();delP(${p.id})">✕</button>`:''}</div>`).join('')}</div>
-    <div class="row" style="margin-top:14px"><input type="text" id="newKo" placeholder="${L.nameKo}"><input type="text" id="newEn" placeholder="${L.nameEn}"><select id="newStart" style="padding:8px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${timeOpts(300)}</select><select id="newLv" style="padding:8px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${lvOpts(0)}</select><button class="btn" onclick="addP()">＋ ${L.add}</button></div></div>`;
+    <div class="row" style="margin-top:14px"><input type="text" id="newKo" placeholder="${L.nameKo}"><input type="text" id="newEn" placeholder="${L.nameEn}"><select id="newLv" style="padding:8px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${lvOpts(0)}</select><button class="btn" onclick="addP()">＋ ${L.add}</button></div></div>`;
   }
   if(S.step===1){
     let cap=[];for(let r=0;r<S.nRounds;r++)cap.push(capacity(r));
@@ -657,7 +657,7 @@ function selAll(v){S.players.forEach(p=>p.sel=v);S.draw=null;renderAll()}
 function setLv(id,v){const p=byId(id);logLevel(p,p.level,+v,'manual');p.level=+v;S.draw=null;save()}
 function delP(id){S.players=S.players.filter(p=>p.id!==id);S.draw=null;renderAll()}
 function editP(id){const p=byId(id),L=t();const k=prompt(L.editKo,p.ko);if(k===null)return;const e=prompt(L.editEn,p.en);if(e===null)return;p.ko=k.trim()||e.trim()||p.ko;p.en=e.trim()||k.trim()||p.en;S.draw=null;renderAll()}
-function addP(){const k=$('#newKo').value.trim(),e=$('#newEn').value.trim();if(!k&&!e)return;S.players.push({id:Date.now(),ko:k||e,en:e||k,level:+$('#newLv').value,sel:true,start:+$('#newStart').value,custom:true});S.draw=null;renderAll()}
+function addP(){const k=$('#newKo').value.trim(),e=$('#newEn').value.trim();if(!k&&!e)return;S.players.push({id:Date.now(),ko:k||e,en:e||k,level:+$('#newLv').value,sel:true,start:300,custom:true});S.draw=null;renderAll()}
 function setCourts(d){S.nCourts=Math.max(1,Math.min(4,S.nCourts+d));S.draw=null;renderAll()}
 function setRounds(d){S.nRounds=Math.max(1,Math.min(12,S.nRounds+d));S.draw=null;renderAll()}
 function setType(c,v){S.types[c]=v;S.draw=null;renderAll()}
