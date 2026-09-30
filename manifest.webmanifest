@@ -1,6 +1,6 @@
 {
- "name": "Tennis Draw Builder",
- "short_name": "Tennis Draw",
+ "name": "On Tennis",
+ "short_name": "On Tennis",
  "description": "Tennis roster and draw builder",
  "start_url": "./",
  "scope": "./",
