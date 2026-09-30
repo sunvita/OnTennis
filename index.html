@@ -524,7 +524,8 @@ function playerCards(){
       <select class="tsel" title="${L.startAt}" onclick="event.stopPropagation()" onchange="setStart(${p.id},this.value)">${timeOpts(p.start)}</select>
       ${p.custom?`<button class="x" onclick="event.stopPropagation();delP(${p.id})">✕</button>`:''}</div>`).join('')
 }
-function refreshPlayers(){const el=document.getElementById('plList');if(el)el.innerHTML=playerCards();const c=document.getElementById('plCount');if(c){const q=UI.plQuery.trim();c.textContent=q?t().shown(S.players.filter(p=>((p.ko||'')+' '+(p.en||'')).toLowerCase().includes(q.toLowerCase())).length,S.players.length):''}}
+function clearSearch(){UI.plQuery='';const i=document.getElementById('plSearch');if(i){i.value='';i.focus()}refreshPlayers()}
+function refreshPlayers(){const cb=document.getElementById('plClear');if(cb)cb.hidden=!UI.plQuery;const el=document.getElementById('plList');if(el)el.innerHTML=playerCards();const c=document.getElementById('plCount');if(c){const q=UI.plQuery.trim();c.textContent=q?t().shown(S.players.filter(p=>((p.ko||'')+' '+(p.en||'')).toLowerCase().includes(q.toLowerCase())).length,S.players.length):''}}
 function setSort(v){UI.plSort=v;renderPanel()}
 function renderPanel(){
   const L=t(),n=selPlayers().length;let h='';
@@ -535,7 +536,7 @@ function renderPanel(){
     <label style="min-width:auto;margin-left:10px">${L.endTime}</label><select onchange="setEnd(this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${timeOpts(S.endMin)}</select></div>
     <div class="row"><label>${L.lenBefore}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenA,'setLenA')}<label style="min-width:auto;margin-left:10px">${L.lenAfter}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenB,'setLenB')}</div>
     <p class="note" style="margin:0 0 10px">${L.rounds}: <b>${S.nRounds}</b> · ${L.roundsAuto} ${L.lateHint}</p>
-    <div class="row"><button class="btn" onclick="selAll(true)">${L.all}</button><button class="btn" onclick="selAll(false)">${L.none}</button><input type="text" id="plSearch" placeholder="${L.searchPh}" value="${esc(UI.plQuery)}" oninput="UI.plQuery=this.value;refreshPlayers()" style="min-width:200px;flex:1">${seg([['none',L.sortOrder],['asc',L.sortAsc],['desc',L.sortDesc]],UI.plSort,'setSort')}<span class="note" id="plCount"></span></div>
+    <div class="row"><button class="btn" onclick="selAll(true)">${L.all}</button><button class="btn" onclick="selAll(false)">${L.none}</button><div style="position:relative;flex:1;min-width:200px"><input type="text" id="plSearch" placeholder="${L.searchPh}" value="${esc(UI.plQuery)}" oninput="UI.plQuery=this.value;refreshPlayers()" style="width:100%;padding-right:34px"><button id="plClear" aria-label="${L.none}" onclick="clearSearch()" ${UI.plQuery?'':'hidden'} style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:0;border-radius:50%;background:#dfe4ee;color:#444;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button></div>${seg([['none',L.sortOrder],['asc',L.sortAsc],['desc',L.sortDesc]],UI.plSort,'setSort')}<span class="note" id="plCount"></span></div>
     <div class="pl" id="plList">${playerCards()}</div>
     <h3 style="margin:20px 0 0;font-size:15px">${L.newPlayer}</h3>
     <div class="row" style="margin-top:6px"><input type="text" id="newKo" placeholder="${L.nameKo}"><input type="text" id="newEn" placeholder="${L.nameEn}"><select id="newLv" style="padding:8px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${lvOpts(0)}</select><button class="btn" onclick="addP()">＋ ${L.add}</button></div></div>`;
