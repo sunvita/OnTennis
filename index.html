@@ -23,6 +23,8 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',s
 .top{background:var(--navy);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 20px;flex-wrap:wrap}
 .top h1{font-size:18px;margin:0;font-weight:700;flex:1}
 .cloudbtn{background:transparent;border:1px solid #ffffff66;color:#fff;border-radius:8px;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+.login{max-width:380px;margin:60px auto}
+.login .row>label{min-width:90px}
 .cloudbtn.err{border-color:#ffb4a9;color:#ffd9d3}
 .lang{display:flex;border:1px solid #ffffff66;border-radius:8px;overflow:hidden}
 .lang button{background:transparent;color:#fff;border:0;padding:6px 14px;font:inherit;cursor:pointer}
@@ -119,8 +121,13 @@ table.st td:nth-child(2),table.st th:nth-child(2){text-align:left}
 <div class="top noprint">
   <h1 id="appTitle"></h1>
   <button class="cloudbtn" id="cloud" hidden></button>
+  <button class="cloudbtn" id="logout" hidden></button>
   <div class="lang"><button id="l-en">English</button><button id="l-ko">한국어</button></div>
 </div>
+<div id="login" hidden><div class="card login"><h2 id="lgTitle"></h2>
+  <div class="row"><label id="lgIdL"></label><input type="text" value="admin" readonly style="background:#f0f3fa"></div>
+  <div class="row"><label id="lgPwL"></label><input type="password" id="loginPw" autocomplete="current-password"></div>
+  <p class="err" id="lgErr"></p><button class="btn pri" id="lgBtn"></button></div></div>
 <div class="wrap">
   <div class="steps noprint" id="steps"></div>
   <div id="panel" class="noprint"></div>
@@ -140,7 +147,7 @@ en:{app:"Tennis draw builder",s1:"Players",s2:"Courts",s3:"Format",s4:"Draw",
  lvl:"Match by level",on:"On",off:"Off",mix:"Mix levels",rot:"Rotate partners",opp:"Avoid repeat opponents",fair:"Fair sit-outs",
  gamesLbl:"Games needed to win",gw:(n,s)=>`first to ${n} games${s?" per set":""}`,unrated:"Unrated",startTimes:"Start times",endTime:"End time",lenBefore:"Round length before 5:00",lenAfter:"Round length from 5:00",roundsAuto:"Set automatically from the start and end times. The last round is trimmed to end on time.",sessionStart:"Session start time",roundLen:"Round length",min:"min",startAt:"Start time",tEarlyLbl:"Early start time",tLateLbl:"Late start time",lateFrom:"Late players join from round",lateHint:"Players are not assigned before their start time and are not counted as resting.",s5:"Levels",basis:"Basis",bLast:"Last N matches",bMonth:"Specific month",bRange:"Date range",nMatchesLbl:"Number of matches",monthLbl:"Month",fromLbl:"From",toLbl:"To",minM:"Minimum matches",cur:"Current",sug:"Suggested",matches:"Matches",wl:"W-L",apply:"Apply",applyAll:"Apply all suggestions",applied:n=>`${n} levels updated`,lvHint:"The system suggests a level from saved results, in 0.5 steps. It compares results against the level of the opponents. Nothing changes until you apply it.",
 saveRes:"Save results to history",saved:n=>`Saved ${n} matches`,noScores:"Enter scores first.",histCount:n=>`${n} matches saved on this device`,clearHist:"Clear history",confirmClear:"Delete all saved match history?",sample:"Add sample history",exportJson:"Export data (JSON)",dateLbl:"Date",noSug:"Not enough matches",
-cloudOff:"Local only",cloudSyncing:"Syncing…",cloudOk:"Synced",cloudErr:"Sync failed. Tap to retry",autoSaved:"Scores save automatically",operatorLbl:"Operator name",levelLog:"Level changes",lvFrom:"from",manual:"Manual",suggestion:"Suggestion",noLog:"No level changes yet.",savedDraws:"Saved draws",openDraw:"Open",drawInfo:(c,r,n)=>`${c} courts · ${r} rounds · ${n} players`,club:"Club name",notesLbl:"Notes on the sheet",notesHint:"One note per line. Notes are saved separately for English and Korean.",resetNotes:"Reset to default",sheetTitle:"Sheet title",
+cloudOff:"Local only",cloudSyncing:"Syncing…",cloudOk:"Synced",cloudErr:"Sync failed. Tap to retry",autoSaved:"Scores save automatically",operatorLbl:"Operator name",levelLog:"Level changes",lvFrom:"from",manual:"Manual",suggestion:"Suggestion",noLog:"No level changes yet.",savedDraws:"Saved draws",openDraw:"Open",drawInfo:(c,r,n)=>`${c} courts · ${r} rounds · ${n} players`,loginTitle:"Operator login",loginId:"ID",loginPw:"Password",loginBtn:"Log in",loginErr:"Wrong password. Try again.",loginNet:"Could not reach the server. Check your connection.",logout:"Log out",acct:"Admin account",pwCur:"Current password",pwNew:"New password",pwNew2:"Repeat new password",pwChange:"Change password",pwDone:"Password changed",pwMismatch:"The new passwords do not match.",pwShort:"Use at least 6 characters.",pwWrong:"Current password is wrong.",club:"Club name",notesLbl:"Notes on the sheet",notesHint:"One note per line. Notes are saved separately for English and Korean.",resetNotes:"Reset to default",sheetTitle:"Sheet title",
  lvlHint:"Doubles: balance teams by level. Singles: match similar levels. Mix levels pairs different levels for variety.",
  back:"Back",next:"Next",gen:"Generate roster sheet",
  shuffle:"Shuffle again",pdf:"Download PDF",print:"Print",makingPdf:"Making PDF…",
@@ -160,7 +167,7 @@ ko:{app:"테니스 대진표 만들기",s1:"참가 선수",s2:"코트",s3:"경�
  lvl:"레벨 매칭",on:"켜기",off:"끄기",mix:"레벨 섞기",rot:"파트너 돌려가며 배정",opp:"상대 중복 피하기",fair:"공정한 휴식 배분",
  gamesLbl:"승리에 필요한 게임 수",gw:(n,s)=>`${s?"세트당 ":""}${n}게임 선취`,unrated:"미정",startTimes:"시작 시간",endTime:"경기 종료 시간",lenBefore:"5:00 이전 라운드 시간",lenAfter:"5:00 이후 라운드 시간",roundsAuto:"시작·종료 시간에 맞춰 자동 계산됩니다. 마지막 라운드는 종료 시간에 맞춰 줄어듭니다.",sessionStart:"경기 시작 시간",roundLen:"라운드 시간",min:"분",startAt:"시작 시간",tEarlyLbl:"이른 시작 시간",tLateLbl:"늦은 시작 시간",lateFrom:"늦은 시작 선수 참여 라운드",lateHint:"선수는 본인 시작 시간 전에는 배정되지 않으며, 휴식 선수로도 표시되지 않습니다.",s5:"레벨 관리",basis:"조정 기준",bLast:"최근 경기 수",bMonth:"특정 월",bRange:"기간 선택",nMatchesLbl:"경기 수",monthLbl:"월",fromLbl:"시작일",toLbl:"종료일",minM:"최소 경기 수",cur:"현재",sug:"제안",matches:"경기",wl:"승-패",apply:"적용",applyAll:"제안 전체 적용",applied:n=>`${n}명의 레벨을 변경했습니다`,lvHint:"저장된 경기 결과로 시스템이 0.5 단위 레벨을 제안합니다. 상대 팀 레벨을 고려해 결과를 비교하며, 적용 버튼을 누르기 전에는 바뀌지 않습니다.",
 saveRes:"결과를 기록에 저장",saved:n=>`${n}경기를 저장했습니다`,noScores:"먼저 점수를 입력하세요.",histCount:n=>`이 기기에 ${n}경기 저장됨`,clearHist:"기록 삭제",confirmClear:"저장된 모든 경기 기록을 삭제할까요?",sample:"샘플 기록 추가",exportJson:"데이터 내보내기 (JSON)",dateLbl:"날짜",noSug:"경기 수 부족",
-cloudOff:"이 기기에만 저장",cloudSyncing:"동기화 중…",cloudOk:"동기화됨",cloudErr:"동기화 실패. 눌러서 다시 시도",autoSaved:"점수는 자동으로 저장됩니다",operatorLbl:"운영자 이름",levelLog:"레벨 변경 이력",lvFrom:"이전",manual:"직접 변경",suggestion:"제안 적용",noLog:"아직 레벨 변경 이력이 없습니다.",savedDraws:"저장된 대진표",openDraw:"열기",drawInfo:(c,r,n)=>`${c}코트 · ${r}라운드 · ${n}명`,club:"클럽 이름",notesLbl:"대진표 안내 사항",notesHint:"한 줄에 안내 문구 하나씩 입력하세요. 한글과 영어 문구는 따로 저장됩니다.",resetNotes:"기본값으로 되돌리기",sheetTitle:"대진표 제목",
+cloudOff:"이 기기에만 저장",cloudSyncing:"동기화 중…",cloudOk:"동기화됨",cloudErr:"동기화 실패. 눌러서 다시 시도",autoSaved:"점수는 자동으로 저장됩니다",operatorLbl:"운영자 이름",levelLog:"레벨 변경 이력",lvFrom:"이전",manual:"직접 변경",suggestion:"제안 적용",noLog:"아직 레벨 변경 이력이 없습니다.",savedDraws:"저장된 대진표",openDraw:"열기",drawInfo:(c,r,n)=>`${c}코트 · ${r}라운드 · ${n}명`,loginTitle:"운영자 로그인",loginId:"아이디",loginPw:"비밀번호",loginBtn:"로그인",loginErr:"비밀번호가 맞지 않습니다. 다시 입력하세요.",loginNet:"서버에 연결할 수 없습니다. 인터넷 연결을 확인하세요.",logout:"로그아웃",acct:"관리자 계정",pwCur:"현재 비밀번호",pwNew:"새 비밀번호",pwNew2:"새 비밀번호 확인",pwChange:"비밀번호 변경",pwDone:"비밀번호를 변경했습니다",pwMismatch:"새 비밀번호가 서로 다릅니다.",pwShort:"6자 이상 입력하세요.",pwWrong:"현재 비밀번호가 맞지 않습니다.",club:"클럽 이름",notesLbl:"대진표 안내 사항",notesHint:"한 줄에 안내 문구 하나씩 입력하세요. 한글과 영어 문구는 따로 저장됩니다.",resetNotes:"기본값으로 되돌리기",sheetTitle:"대진표 제목",
  lvlHint:"복식: 레벨로 팀 균형을 맞춥니다. 단식: 비슷한 레벨끼리 붙입니다. 레벨 섞기는 다양한 레벨과 만나도록 배정합니다.",
  back:"이전",next:"다음",gen:"대진표 생성",
  shuffle:"다시 섞기",pdf:"PDF 다운로드",print:"인쇄",makingPdf:"PDF 만드는 중…",
@@ -181,13 +188,56 @@ const S={lang:'ko',step:0,
  draw:null,scores:{},notesCustom:{ko:null,en:null}};
 const CFG=window.TENNIS_CFG||{};
 const cloud={on:!!(CFG.url&&CFG.key),st:'off',timer:null,applying:false,last:'',busy:false,q:Promise.resolve(),n:0};
-async function rest(path,opt={}){
+const AUTH_KEY='tennisAuthV1';
+let session=null;try{session=JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch(e){}
+const base=()=>CFG.url.replace(/\/$/,'');
+async function authReq(path,method,body,token){
+  const h={apikey:CFG.key,'Content-Type':'application/json'};if(token)h.Authorization='Bearer '+token;
+  const r=await fetch(base()+'/auth/v1/'+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(j.msg||j.error_description||j.message||String(r.status));e.status=r.status;throw e}
+  return j;
+}
+function setSession(j){session={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Math.floor(Date.now()/1000)+(j.expires_in||3600)};try{localStorage.setItem(AUTH_KEY,JSON.stringify(session))}catch(e){}}
+async function refreshSession(){if(!session)return false;try{setSession(await authReq('token?grant_type=refresh_token','POST',{refresh_token:session.refresh_token}));return true}catch(e){return false}}
+async function ensureFresh(){if(session&&session.expires_at-Math.floor(Date.now()/1000)<60){if(!(await refreshSession())){logout();throw new Error('session expired')}}}
+function logout(){session=null;try{localStorage.removeItem(AUTH_KEY);localStorage.removeItem(KEY)}catch(e){}location.reload()}
+const adminEmail=()=>CFG.adminEmail||'admin@ontennis.app';
+async function rest(path,opt={},retry=true){
+  await ensureFresh();
   const h={apikey:CFG.key,'Content-Type':'application/json'};
-  if(String(CFG.key).startsWith('eyJ'))h.Authorization='Bearer '+CFG.key;
-  const r=await fetch(CFG.url.replace(/\/$/,'')+'/rest/v1/'+path,{...opt,headers:{...h,...(opt.headers||{})}});
+  if(session)h.Authorization='Bearer '+session.access_token;
+  else if(String(CFG.key).startsWith('eyJ'))h.Authorization='Bearer '+CFG.key;
+  const r=await fetch(base()+'/rest/v1/'+path,{...opt,headers:{...h,...(opt.headers||{})}});
+  if(r.status===401&&session&&retry){if(await refreshSession())return rest(path,opt,false);logout();throw new Error('unauthorized')}
   if(!r.ok)throw new Error(await r.text());
   if(r.status===204)return null;
   const tx=await r.text();return tx?JSON.parse(tx):null;
+}
+function applyGate(){
+  const need=cloud.on&&!session;
+  const lg=document.getElementById('login'),w=document.querySelector('.wrap');
+  if(lg)lg.hidden=!need;if(w)w.hidden=need;
+  const L=t(),set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set('lgTitle',L.loginTitle);set('lgIdL',L.loginId);set('lgPwL',L.loginPw);set('lgBtn',L.loginBtn);
+  const lo=document.getElementById('logout');if(lo){lo.hidden=!(cloud.on&&session);lo.textContent=L.logout}
+}
+async function doLogin(){
+  const pw=document.getElementById('loginPw').value,err=document.getElementById('lgErr');err.textContent='';
+  if(!pw)return;
+  try{setSession(await authReq('token?grant_type=password','POST',{email:adminEmail(),password:pw}));
+    document.getElementById('loginPw').value='';applyGate();pull()}
+  catch(e){err.textContent=(e.status===400||e.status===401||e.status===422)?t().loginErr:t().loginNet}
+}
+async function changePw(){
+  const L=t(),cur=$('#pwCur').value,n1=$('#pwNew').value,n2=$('#pwNew2').value,m=$('#pwMsg');m.className='note';
+  if(n1.length<6){m.textContent=L.pwShort;m.className='err';return}
+  if(n1!==n2){m.textContent=L.pwMismatch;m.className='err';return}
+  try{
+    let j;try{j=await authReq('token?grant_type=password','POST',{email:adminEmail(),password:cur})}catch(e){m.textContent=L.pwWrong;m.className='err';return}
+    setSession(j);await authReq('user','PUT',{password:n1},session.access_token);
+    m.textContent=L.pwDone;$('#pwCur').value=$('#pwNew').value=$('#pwNew2').value='';
+  }catch(e){m.textContent=String(e.message||e);m.className='err'}
 }
 const SET_KEYS=['nCourts','types','avail','scoring','games','levelMode','rotate','avoidOpp','fair','club','title','startMin','endMin','roundLenA','roundLenB','notesCustom','rc'];
 function setCloud(st){cloud.st=st;updateCloudUI()}
@@ -199,7 +249,7 @@ function updateCloudUI(){
   b.classList.toggle('err',cloud.st==='err');
 }
 function scheduleSync(){
-  if(!cloud.on||cloud.applying)return;
+  if(!cloud.on||!session||cloud.applying)return;
   clearTimeout(cloud.timer);cloud.timer=setTimeout(pushState,1500);
 }
 const plRow=p=>({id:p.id,ko:p.ko,en:p.en,level:p.level,start_min:p.start,custom:!!p.custom,sel:!!p.sel});
@@ -221,7 +271,7 @@ async function pushState(){
 }
 const mRow=h=>({sid:String(h.sid),played_on:h.date,r:h.r||0,c:h.c||0,type:h.type||'doubles',a:h.a,b:h.b,sa:h.sa,sb:h.sb});
 function cloudMatches(op){
-  if(!cloud.on)return Promise.resolve();
+  if(!cloud.on||!session)return Promise.resolve();
   cloud.n++;setCloud('sync');
   const p=cloud.q.then(op).then(()=>{cloud.n--;if(!cloud.n)setCloud('ok')},e=>{cloud.n--;console.warn('sync',e);setCloud('err')});
   cloud.q=p;return p;
@@ -247,7 +297,7 @@ function logLevel(p,old,nw,src){
   cloudMatches(()=>rest('tennis_level_changes',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify([lvRow(x)])}));
 }
 async function pull(){
-  if(!cloud.on||cloud.busy)return;cloud.busy=true;
+  if(!cloud.on||!session||cloud.busy)return;cloud.busy=true;
   try{
     setCloud('sync');
     const [pl,mt,st,lc]=await Promise.all([rest('tennis_players?select=*&order=id'),rest('tennis_matches?select=*&order=id'),rest('tennis_settings?select=*'),rest('tennis_level_changes?select=*&order=id.desc&limit=200')]);
@@ -493,7 +543,12 @@ function renderPanel(){
     <div class="row"><label>${L.fair}</label>${tog(S.fair,'togF(\'fair\')')}</div>
     <div class="row"><label>${L.sheetTitle}</label><input type="text" value="${esc(S.title)}" placeholder="${L.drawTitle}" oninput="S.title=this.value"></div>
     <div class="row"><label>${L.club}</label><input type="text" value="${esc(S.club)}" oninput="S.club=this.value"></div>
-    <div class="row" style="align-items:flex-start"><label>${L.notesLbl}</label><div style="flex:1;min-width:240px"><textarea id="notesTa" rows="5" style="width:100%;border:1px solid #b8c1d6;border-radius:8px;padding:8px 10px;font:inherit" oninput="setNotes(this.value)">${esc(notesFor().join('\n'))}</textarea><p class="hint" style="margin:4px 0 6px">${L.notesHint}</p><button class="btn" onclick="resetNotes()">${L.resetNotes}</button></div></div></div>`;
+    <div class="row" style="align-items:flex-start"><label>${L.notesLbl}</label><div style="flex:1;min-width:240px"><textarea id="notesTa" rows="5" style="width:100%;border:1px solid #b8c1d6;border-radius:8px;padding:8px 10px;font:inherit" oninput="setNotes(this.value)">${esc(notesFor().join('\n'))}</textarea><p class="hint" style="margin:4px 0 6px">${L.notesHint}</p><button class="btn" onclick="resetNotes()">${L.resetNotes}</button></div></div></div>
+    ${cloud.on&&session?`<div class="card"><h2>${L.acct}</h2>
+    <div class="row"><label>${L.pwCur}</label><input type="password" id="pwCur" autocomplete="current-password"></div>
+    <div class="row"><label>${L.pwNew}</label><input type="password" id="pwNew" autocomplete="new-password"></div>
+    <div class="row"><label>${L.pwNew2}</label><input type="password" id="pwNew2" autocomplete="new-password"></div>
+    <div class="row"><button class="btn" onclick="changePw()">${L.pwChange}</button><span class="note" id="pwMsg"></span></div></div>`:''}`;
   }
   if(S.step===4){
     const rc=S.rc,rows=S.players.map(p=>{const q=ratingStats(p.id),ch=q.sug!=null&&q.sug!==p.level;
@@ -540,7 +595,7 @@ function openDraw(sid){
   S.draw=d.data.rounds;S.scores=d.data.scores||{};S.drawId=String(d.sid);S.saveDate=d.played_on;S.step=3;renderAll();window.scrollTo({top:0});
 }
 function renderAll(){
-  save();updateCloudUI();
+  save();updateCloudUI();applyGate();
   document.documentElement.lang=S.lang;
   $('#appTitle').textContent=t().app;
   $('#l-en').classList.toggle('on',S.lang==='en');$('#l-ko').classList.toggle('on',S.lang==='ko');
@@ -634,9 +689,13 @@ async function dlPdf(){
 }
 renderAll();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-document.getElementById('cloud').onclick=()=>{if(cloud.on){cloud.busy=false;pushState().then(pull)}};
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.on&&!cloud.timer)pull()});
-if(cloud.on)pull();
+document.getElementById('cloud').onclick=()=>{if(cloud.on&&session){cloud.busy=false;pushState().then(pull)}};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.on&&session&&!cloud.timer)pull()});
+document.getElementById('lgBtn').onclick=doLogin;
+document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('logout').onclick=logout;
+applyGate();
+if(cloud.on&&session)pull();
 </script>
 </body>
 </html>

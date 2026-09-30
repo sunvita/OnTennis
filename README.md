@@ -15,4 +15,4 @@ Connect this repository to Netlify (Add new site, Import an existing project, ch
 
 ## Data
 Players, settings, match results, level changes, and saved draws are stored in Supabase.
-The current access rules are for testing and let anyone with the link read and write. Add operator login before wider use.
+Access is limited to a signed-in operator. The app uses one shared Supabase Auth user (`admin@ontennis.app`, created in the Supabase dashboard with Auto Confirm). The password can be changed in the app under Format, Admin account.

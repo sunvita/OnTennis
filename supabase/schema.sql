@@ -38,12 +38,10 @@ alter table public.tennis_players  enable row level security;
 alter table public.tennis_matches  enable row level security;
 alter table public.tennis_settings enable row level security;
 
--- TEST ONLY: anyone who has the app link (anon key) can read and write.
--- Before real use, replace these with policies that require a signed-in operator
--- (for example: to authenticated using (true) with check (true)) and add Supabase Auth login.
-create policy "test open access" on public.tennis_players  for all to anon, authenticated using (true) with check (true);
-create policy "test open access" on public.tennis_matches  for all to anon, authenticated using (true) with check (true);
-create policy "test open access" on public.tennis_settings for all to anon, authenticated using (true) with check (true);
+-- Operators only: the app signs in with one shared Supabase Auth user (admin@ontennis.app).
+create policy "operators only" on public.tennis_players  for all to authenticated using (true) with check (true);
+create policy "operators only" on public.tennis_matches  for all to authenticated using (true) with check (true);
+create policy "operators only" on public.tennis_settings for all to authenticated using (true) with check (true);
 
 -- Level change history and saved draws
 create table if not exists public.tennis_level_changes (
@@ -71,5 +69,5 @@ create index if not exists tennis_draws_date_idx on public.tennis_draws (played_
 
 alter table public.tennis_level_changes enable row level security;
 alter table public.tennis_draws enable row level security;
-create policy "test open access" on public.tennis_level_changes for all to anon, authenticated using (true) with check (true);
-create policy "test open access" on public.tennis_draws for all to anon, authenticated using (true) with check (true);
+create policy "operators only" on public.tennis_level_changes for all to authenticated using (true) with check (true);
+create policy "operators only" on public.tennis_draws for all to authenticated using (true) with check (true);
