@@ -665,7 +665,7 @@ function addSample(){
 function clearHist(){if(confirm(t().confirmClear)){S.history=[];save();renderPanel();cloudMatches(()=>rest('tennis_matches?sid=neq.__none__',{method:'DELETE'}))}}
 function exportData(){const b=new Blob([JSON.stringify({players:S.players,history:S.history},null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='tennis-data.json';a.click()}
 function togP(id){const p=byId(id);p.sel=!p.sel;S.draw=null;renderAll()}
-function selAll(v){S.players.forEach(p=>p.sel=v);S.draw=null;renderAll()}
+function selAll(v){const q=UI.plQuery.trim().toLowerCase();S.players.forEach(p=>{if(!q||(p.ko||'').toLowerCase().includes(q)||(p.en||'').toLowerCase().includes(q))p.sel=v});S.draw=null;renderAll()}
 function setLv(id,v){const p=byId(id);logLevel(p,p.level,+v,'manual');p.level=+v;S.draw=null;save()}
 function delP(id){S.players=S.players.filter(p=>p.id!==id);S.draw=null;renderAll()}
 function editP(id){const p=byId(id),L=t();const k=prompt(L.editKo,p.ko);if(k===null)return;const e=prompt(L.editEn,p.en);if(e===null)return;p.ko=k.trim()||e.trim()||p.ko;p.en=e.trim()||k.trim()||p.en;S.draw=null;renderAll()}
