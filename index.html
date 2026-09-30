@@ -193,7 +193,7 @@ const S={lang:'ko',step:0,
  history:[],levelLog:[],draws:[],operator:'',saveDate:new Date().toISOString().slice(0,10),drawId:0,rc:{mode:'last',n:10,month:new Date().toISOString().slice(0,7),from:'',to:'',min:5},startMin:240,endMin:420,roundLenA:30,roundLenB:25,scoring:'ss1',games:5,levelMode:'on',rotate:true,avoidOpp:true,fair:true,club:'On Tennis',title:'',
  draw:null,scores:{},notesCustom:{ko:null,en:null}};
 const CFG=window.TENNIS_CFG||{};
-const cloud={on:!!(CFG.url&&CFG.key),st:'off',timer:null,applying:false,last:'',busy:false,q:Promise.resolve(),n:0};
+const cloud={on:!!(CFG.url&&CFG.key),st:'off',timer:null,applying:false,last:'',busy:false,ready:false,q:Promise.resolve(),n:0};
 const AUTH_KEY='tennisAuthV1';
 let session=null;try{session=JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch(e){}
 const base=()=>CFG.url.replace(/\/$/,'');
@@ -260,7 +260,7 @@ function scheduleSync(){
 }
 const plRow=p=>({id:p.id,ko:p.ko,en:p.en,level:p.level,start_min:p.start,custom:!!p.custom,sel:!!p.sel});
 async function pushState(){
-  cloud.timer=null;if(!cloud.on)return;
+  cloud.timer=null;if(!cloud.on||!cloud.ready)return;
   const settings={};SET_KEYS.forEach(k=>settings[k]=S[k]);
   const sig=JSON.stringify([S.players.map(plRow),settings]);
   if(sig===cloud.last)return;
@@ -308,7 +308,7 @@ async function pull(){
     setCloud('sync');
     const [pl,mt,st,lc]=await Promise.all([rest('tennis_players?select=*&order=id'),rest('tennis_matches?select=*&order=id'),rest('tennis_settings?select=*'),rest('tennis_level_changes?select=*&order=id.desc&limit=200')]);
     if(!pl.length&&!mt.length&&!st.length){
-      cloud.last='';await pushState();
+      cloud.last='';cloud.ready=true;await pushState();
       if(S.history.length)await rest('tennis_matches',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(S.history.map(mRow))});
     }else{
       cloud.applying=true;
@@ -320,7 +320,7 @@ async function pull(){
       const settings={};SET_KEYS.forEach(k=>settings[k]=S[k]);
       cloud.last=JSON.stringify([S.players.map(plRow),settings]);
       if(S.step===3)S.step=0;
-      renderAll();cloud.applying=false;setCloud('ok');pullDraws();
+      cloud.ready=true;renderAll();cloud.applying=false;setCloud('ok');pullDraws();
     }
   }catch(e){console.warn('sync',e);cloud.applying=false;setCloud('err')}
   cloud.busy=false;
