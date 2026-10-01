@@ -77,3 +77,6 @@ alter table public.tennis_players
   add column if not exists from_round int,
   add column if not exists to_round int,
   add column if not exists rounds int[];
+
+-- Name aliases used when matching pasted attendance lists
+alter table public.tennis_players add column if not exists aliases text[];
