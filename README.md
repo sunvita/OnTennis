@@ -17,7 +17,5 @@ Connect this repository to Netlify (Add new site, Import an existing project, ch
 Players, settings, match results, level changes, and saved draws are stored in Supabase.
 Access is limited to a signed-in operator. The app uses one shared Supabase Auth user (`admin@ontennis.app`, created in the Supabase dashboard with Auto Confirm). The password can be changed in the app under Format, Admin account.
 
-## Reading attendance screenshots
-The players screen can read a KakaoTalk attendance screenshot (button "Read from image", or paste an image into the paste box).
-- Preferred: the Supabase Edge Function `supabase/functions/roster-ocr` sends the image to the Anthropic API. It requires a signed-in operator and a secret named `ANTHROPIC_API_KEY` (Supabase dashboard, Edge Functions, Secrets). Optional secret `ROSTER_OCR_MODEL` overrides the model.
-- Fallback: in-browser text recognition (Tesseract). It works without a key but misreads many Korean names, so every name must be checked.
+## Attendance import (paused)
+The KakaoTalk paste and screenshot import was removed from the app for now. It is kept in git history (commit dce7eb2) and the Supabase Edge Function `supabase/functions/roster-ocr` is still deployed but unused by the app.
