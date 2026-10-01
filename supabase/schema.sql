@@ -71,3 +71,9 @@ alter table public.tennis_level_changes enable row level security;
 alter table public.tennis_draws enable row level security;
 create policy "operators only" on public.tennis_level_changes for all to authenticated using (true) with check (true);
 create policy "operators only" on public.tennis_draws for all to authenticated using (true) with check (true);
+
+-- Per-player round availability (start round, end round, or an explicit round list)
+alter table public.tennis_players
+  add column if not exists from_round int,
+  add column if not exists to_round int,
+  add column if not exists rounds int[];
