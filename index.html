@@ -63,6 +63,10 @@ button.btn,.seg button{font:inherit;cursor:pointer}
 .rch button{width:30px;height:30px;border-radius:6px;border:1px solid #b8c1d6;background:#fff;cursor:pointer;font:inherit;font-size:12px;padding:0}
 .rch button.on{background:#f0a531;border-color:#c97f0a;color:#3a2000;font-weight:700}
 .chip.gray{background:#eef0f4;color:#444;border:1px solid #c5ccdb}
+.pn.sw{cursor:pointer;border-bottom:1.5px dashed #1f3fc0}
+.pn.sel{background:#ffe08a;border-radius:3px}
+.paste{border:1px dashed #b8c1d6;border-radius:10px;padding:10px;margin:8px 0;background:#fafbfe}
+.paste textarea{width:100%;border:1px solid #b8c1d6;border-radius:8px;padding:8px 10px;font:inherit;min-height:110px}
 .chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}
 .chip.early{background:#ffe9bf;color:#9a4a00;border:1px solid #f0a531}
 .chip.later{background:#e8f0fe;color:#1f3fc0;border:1px solid #8fb0f2}
@@ -159,7 +163,7 @@ en:{app:"On Tennis",s1:"Players",s2:"Courts",s3:"Format",s4:"Draw",
  lvl:"Match by level",on:"On",off:"Off",mix:"Mix levels",rot:"Rotate partners",opp:"Avoid repeat opponents",fair:"Fair sit-outs",
  gamesLbl:"Games needed to win",gw:(n,s)=>`first to ${n} games${s?" per set":""}`,unrated:"Unrated",startTimes:"Start times",endTime:"End",lenBefore:"Round length before 5:00",lenAfter:"Round length from 5:00",roundsAuto:"Set automatically from the start and end times. The last round is trimmed to end on time.",sessionStart:"Start",roundLen:"Round length",min:"min",startAt:"Start time",tEarlyLbl:"Early start time",tLateLbl:"Late start time",lateFrom:"Late players join from round",lateHint:"Players are not assigned before their start time and are not counted as resting.",s5:"Levels",basis:"Basis",bLast:"Last N matches",bMonth:"Specific month",bRange:"Date range",nMatchesLbl:"Number of matches",monthLbl:"Month",fromLbl:"From",toLbl:"To",minM:"Minimum matches",cur:"Current",sug:"Suggested",matches:"Matches",wl:"W-L",apply:"Apply",applyAll:"Apply all suggestions",applied:n=>`${n} levels updated`,lvHint:"The system suggests a level from saved results, in 0.5 steps. It compares results against the level of the opponents. Nothing changes until you apply it.",
 saveRes:"Save results to history",saved:n=>`Saved ${n} matches`,noScores:"Enter scores first.",histCount:n=>`${n} matches saved on this device`,clearHist:"Clear history",confirmClear:"Delete all saved match history?",sample:"Add sample history",exportJson:"Export data (JSON)",dateLbl:"Date",noSug:"Not enough matches",
-cloudOff:"Local only",cloudSyncing:"Syncing…",cloudOk:"Synced",cloudErr:"Sync failed. Tap to retry",autoSaved:"Scores save automatically",operatorLbl:"Operator name",levelLog:"Level changes",lvFrom:"from",manual:"Manual",suggestion:"Suggestion",noLog:"No level changes yet.",savedDraws:"Saved draws",openDraw:"Open",drawInfo:(c,r,n)=>`${c} courts · ${r} rounds · ${n} players`,loginTitle:"Operator login",loginId:"ID",loginPw:"Password",loginBtn:"Log in",loginErr:"Wrong password. Try again.",loginNet:"Could not reach the server. Check your connection.",logout:"Log out",acct:"Admin account",pwCur:"Current password",pwNew:"New password",pwNew2:"Repeat new password",pwChange:"Change password",pwDone:"Password changed",pwMismatch:"The new passwords do not match.",pwShort:"Use at least 6 characters.",pwWrong:"Current password is wrong.",earlyCnt:(t,n)=>`Starting at ${t}: ${n}`,laterCnt:n=>`Joining later: ${n}`,newPlayer:"Register new player",searchPh:"Search by name",sortOrder:"Registered order",sortAsc:"A to Z",sortDesc:"Z to A",noMatch:"No players match.",shown:(a,b)=>`Showing ${a} of ${b}`,courtNo:"Court no.",cw:"Available time",cwAll:"All",defStart:"Default start",startR:"Start",endR:"End",toEnd:"To the end",defLbl:(r,t)=>`Default (${r}R · ${t})`,uptoR:r=>`Until ${r}R`,custom:"Pick rounds",customOff:"Reset",chipEarly:n=>`Early ${n}`,chipDefault:n=>`Default ${n}`,chipCustom:n=>`Custom ${n}`,pvH:"Check before generating",pvRound:"Round",pvCourts:"Open courts",pvPlayers:"Players",pvSlots:"Slots",pvRest:"Resting",pvEmpty:"Empty spots",club:"Club name",notesLbl:"Notes on the sheet",notesHint:"One note per line. Notes are saved separately for English and Korean.",resetNotes:"Reset to default",sheetTitle:"Sheet title",
+cloudOff:"Local only",cloudSyncing:"Syncing…",cloudOk:"Synced",cloudErr:"Sync failed. Tap to retry",autoSaved:"Scores save automatically",operatorLbl:"Operator name",levelLog:"Level changes",lvFrom:"from",manual:"Manual",suggestion:"Suggestion",noLog:"No level changes yet.",savedDraws:"Saved draws",openDraw:"Open",drawInfo:(c,r,n)=>`${c} courts · ${r} rounds · ${n} players`,loginTitle:"Operator login",loginId:"ID",loginPw:"Password",loginBtn:"Log in",loginErr:"Wrong password. Try again.",loginNet:"Could not reach the server. Check your connection.",logout:"Log out",acct:"Admin account",pwCur:"Current password",pwNew:"New password",pwNew2:"Repeat new password",pwChange:"Change password",pwDone:"Password changed",pwMismatch:"The new passwords do not match.",pwShort:"Use at least 6 characters.",pwWrong:"Current password is wrong.",earlyCnt:(t,n)=>`Starting at ${t}: ${n}`,laterCnt:n=>`Joining later: ${n}`,newPlayer:"Register new player",searchPh:"Search by name",sortOrder:"Registered order",sortAsc:"A to Z",sortDesc:"Z to A",noMatch:"No players match.",shown:(a,b)=>`Showing ${a} of ${b}`,courtNo:"Court no.",cw:"Available time",cwAll:"All",defStart:"Default start",startR:"Start",endR:"End",toEnd:"To the end",defLbl:(r,t)=>`Default (${r}R · ${t})`,uptoR:r=>`Until ${r}R`,custom:"Pick rounds",customOff:"Reset",chipEarly:n=>`Early ${n}`,chipDefault:n=>`Default ${n}`,chipCustom:n=>`Custom ${n}`,pvH:"Check before generating",pvRound:"Round",pvCourts:"Open courts",pvPlayers:"Players",pvSlots:"Slots",pvRest:"Resting",pvEmpty:"Empty spots",pasteBtn:"Paste attendance list",pastePh:"Paste the list from KakaoTalk. Examples: 1. Jeno / Kai (5pm) / Minsu until 6pm / Eddie 5-6R",pasteRun:"Analyze",pasteClose:"Close",pasteApply:"Apply",pasteReplace:"Select only these players",pasteReset:"Reset earlier arrival and leave settings",pasteOk:"Found",pasteNone:"Not in the roster",pasteRegister:"Register as new",pasteSkip:"Skipped (declined)",pasteDone:(a,b)=>`${a} selected, ${b} registered`,pasteEmpty:"Nothing to apply.",swapBtn:"Swap players",swapOn:"Tap two players in the same round to swap them.",swapDone:"Done",swapRound:"Pick players from the same round.",club:"Club name",notesLbl:"Notes on the sheet",notesHint:"One note per line. Notes are saved separately for English and Korean.",resetNotes:"Reset to default",sheetTitle:"Sheet title",
  lvlHint:"Doubles: balance teams by level. Singles: match similar levels. Mix levels pairs different levels for variety.",
  back:"Back",next:"Next",gen:"Generate roster sheet",
  shuffle:"Shuffle again",pdf:"Download PDF",print:"Print",makingPdf:"Making PDF…",
@@ -179,7 +183,7 @@ ko:{app:"On Tennis",s1:"참가 선수",s2:"코트",s3:"경기 방식",s4:"대진
  lvl:"레벨 매칭",on:"켜기",off:"끄기",mix:"레벨 섞기",rot:"파트너 돌려가며 배정",opp:"상대 중복 피하기",fair:"공정한 휴식 배분",
  gamesLbl:"승리에 필요한 게임 수",gw:(n,s)=>`${s?"세트당 ":""}${n}게임 선취`,unrated:"미정",startTimes:"시작 시간",endTime:"경기 종료",lenBefore:"5:00 이전 라운드 시간",lenAfter:"5:00 이후 라운드 시간",roundsAuto:"시작·종료 시간에 맞춰 자동 계산됩니다. 마지막 라운드는 종료 시간에 맞춰 줄어듭니다.",sessionStart:"경기 시작",roundLen:"라운드 시간",min:"분",startAt:"시작 시간",tEarlyLbl:"이른 시작 시간",tLateLbl:"늦은 시작 시간",lateFrom:"늦은 시작 선수 참여 라운드",lateHint:"선수는 본인 시작 시간 전에는 배정되지 않으며, 휴식 선수로도 표시되지 않습니다.",s5:"레벨 관리",basis:"조정 기준",bLast:"최근 경기 수",bMonth:"특정 월",bRange:"기간 선택",nMatchesLbl:"경기 수",monthLbl:"월",fromLbl:"시작일",toLbl:"종료일",minM:"최소 경기 수",cur:"현재",sug:"제안",matches:"경기",wl:"승-패",apply:"적용",applyAll:"제안 전체 적용",applied:n=>`${n}명의 레벨을 변경했습니다`,lvHint:"저장된 경기 결과로 시스템이 0.5 단위 레벨을 제안합니다. 상대 팀 레벨을 고려해 결과를 비교하며, 적용 버튼을 누르기 전에는 바뀌지 않습니다.",
 saveRes:"결과를 기록에 저장",saved:n=>`${n}경기를 저장했습니다`,noScores:"먼저 점수를 입력하세요.",histCount:n=>`이 기기에 ${n}경기 저장됨`,clearHist:"기록 삭제",confirmClear:"저장된 모든 경기 기록을 삭제할까요?",sample:"샘플 기록 추가",exportJson:"데이터 내보내기 (JSON)",dateLbl:"날짜",noSug:"경기 수 부족",
-cloudOff:"이 기기에만 저장",cloudSyncing:"동기화 중…",cloudOk:"동기화됨",cloudErr:"동기화 실패. 눌러서 다시 시도",autoSaved:"점수는 자동으로 저장됩니다",operatorLbl:"운영자 이름",levelLog:"레벨 변경 이력",lvFrom:"이전",manual:"직접 변경",suggestion:"제안 적용",noLog:"아직 레벨 변경 이력이 없습니다.",savedDraws:"저장된 대진표",openDraw:"열기",drawInfo:(c,r,n)=>`${c}코트 · ${r}라운드 · ${n}명`,loginTitle:"운영자 로그인",loginId:"아이디",loginPw:"비밀번호",loginBtn:"로그인",loginErr:"비밀번호가 맞지 않습니다. 다시 입력하세요.",loginNet:"서버에 연결할 수 없습니다. 인터넷 연결을 확인하세요.",logout:"로그아웃",acct:"관리자 계정",pwCur:"현재 비밀번호",pwNew:"새 비밀번호",pwNew2:"새 비밀번호 확인",pwChange:"비밀번호 변경",pwDone:"비밀번호를 변경했습니다",pwMismatch:"새 비밀번호가 서로 다릅니다.",pwShort:"6자 이상 입력하세요.",pwWrong:"현재 비밀번호가 맞지 않습니다.",earlyCnt:(t,n)=>`${t} 시작: ${n}명`,laterCnt:n=>`이후 참여: ${n}명`,newPlayer:"신규 선수 등록",searchPh:"이름 검색",sortOrder:"등록순",sortAsc:"가나다순 ▲",sortDesc:"가나다 역순 ▼",noMatch:"일치하는 선수가 없습니다.",shown:(a,b)=>`${b}명 중 ${a}명 표시`,courtNo:"코트 번호",cw:"사용 시간",cwAll:"전체",defStart:"기본 시작",startR:"시작",endR:"종료",toEnd:"끝까지",defLbl:(r,t)=>`기본 (${r}R · ${t})`,uptoR:r=>`${r}R까지`,custom:"직접 지정",customOff:"해제",chipEarly:n=>`일찍 ${n}명`,chipDefault:n=>`기본 ${n}명`,chipCustom:n=>`지정 ${n}명`,pvH:"생성 전 확인",pvRound:"라운드",pvCourts:"열린 코트",pvPlayers:"참여 인원",pvSlots:"자리",pvRest:"휴식",pvEmpty:"빈 자리",club:"클럽 이름",notesLbl:"대진표 안내 사항",notesHint:"한 줄에 안내 문구 하나씩 입력하세요. 한글과 영어 문구는 따로 저장됩니다.",resetNotes:"기본값으로 되돌리기",sheetTitle:"대진표 제목",
+cloudOff:"이 기기에만 저장",cloudSyncing:"동기화 중…",cloudOk:"동기화됨",cloudErr:"동기화 실패. 눌러서 다시 시도",autoSaved:"점수는 자동으로 저장됩니다",operatorLbl:"운영자 이름",levelLog:"레벨 변경 이력",lvFrom:"이전",manual:"직접 변경",suggestion:"제안 적용",noLog:"아직 레벨 변경 이력이 없습니다.",savedDraws:"저장된 대진표",openDraw:"열기",drawInfo:(c,r,n)=>`${c}코트 · ${r}라운드 · ${n}명`,loginTitle:"운영자 로그인",loginId:"아이디",loginPw:"비밀번호",loginBtn:"로그인",loginErr:"비밀번호가 맞지 않습니다. 다시 입력하세요.",loginNet:"서버에 연결할 수 없습니다. 인터넷 연결을 확인하세요.",logout:"로그아웃",acct:"관리자 계정",pwCur:"현재 비밀번호",pwNew:"새 비밀번호",pwNew2:"새 비밀번호 확인",pwChange:"비밀번호 변경",pwDone:"비밀번호를 변경했습니다",pwMismatch:"새 비밀번호가 서로 다릅니다.",pwShort:"6자 이상 입력하세요.",pwWrong:"현재 비밀번호가 맞지 않습니다.",earlyCnt:(t,n)=>`${t} 시작: ${n}명`,laterCnt:n=>`이후 참여: ${n}명`,newPlayer:"신규 선수 등록",searchPh:"이름 검색",sortOrder:"등록순",sortAsc:"가나다순 ▲",sortDesc:"가나다 역순 ▼",noMatch:"일치하는 선수가 없습니다.",shown:(a,b)=>`${b}명 중 ${a}명 표시`,courtNo:"코트 번호",cw:"사용 시간",cwAll:"전체",defStart:"기본 시작",startR:"시작",endR:"종료",toEnd:"끝까지",defLbl:(r,t)=>`기본 (${r}R · ${t})`,uptoR:r=>`${r}R까지`,custom:"직접 지정",customOff:"해제",chipEarly:n=>`일찍 ${n}명`,chipDefault:n=>`기본 ${n}명`,chipCustom:n=>`지정 ${n}명`,pvH:"생성 전 확인",pvRound:"라운드",pvCourts:"열린 코트",pvPlayers:"참여 인원",pvSlots:"자리",pvRest:"휴식",pvEmpty:"빈 자리",pasteBtn:"카톡 명단 붙여넣기",pastePh:"카톡 명단을 붙여넣으세요. 예) 1. 제노 / 카이(5시) / 민수 6시까지 / 에디 5-6R",pasteRun:"분석",pasteClose:"닫기",pasteApply:"적용",pasteReplace:"이 명단만 선택(기존 선택 해제)",pasteReset:"기존 도착·퇴장 설정 초기화",pasteOk:"일치",pasteNone:"명단에 없음",pasteRegister:"신규 등록",pasteSkip:"제외(불참)",pasteDone:(a,b)=>`${a}명 선택, ${b}명 신규 등록`,pasteEmpty:"적용할 내용이 없습니다.",swapBtn:"선수 맞바꾸기",swapOn:"같은 라운드의 선수 두 명을 차례로 누르면 자리가 바뀝니다.",swapDone:"완료",swapRound:"같은 라운드의 선수를 선택하세요.",club:"클럽 이름",notesLbl:"대진표 안내 사항",notesHint:"한 줄에 안내 문구 하나씩 입력하세요. 한글과 영어 문구는 따로 저장됩니다.",resetNotes:"기본값으로 되돌리기",sheetTitle:"대진표 제목",
  lvlHint:"복식: 레벨로 팀 균형을 맞춥니다. 단식: 비슷한 레벨끼리 붙입니다. 레벨 섞기는 다양한 레벨과 만나도록 배정합니다.",
  back:"이전",next:"다음",gen:"대진표 생성",
  shuffle:"다시 섞기",pdf:"PDF 다운로드",print:"인쇄",makingPdf:"PDF 만드는 중…",
@@ -335,7 +339,7 @@ async function pull(){
   }catch(e){console.warn('sync',e);cloud.applying=false;setCloud('err')}
   cloud.busy=false;
 }
-const UI={plQuery:'',plSort:'none'};
+const UI={plQuery:'',plSort:'none',pasteOpen:false,pasteText:'',pasteRes:null,pasteReplace:true,pasteReset:true,swap:false,sel:null};
 const KEY='tennisDrawV1';
 function save(){try{const {draw,scores,step,drawId,...rest}=S;localStorage.setItem(KEY,JSON.stringify(rest))}catch(e){}
   scheduleSync()}
@@ -482,9 +486,21 @@ function clubHTML(){
   const fs=two?34:44;
   return `<div style="display:flex;align-items:center;gap:8px"><div style="font:italic 900 ${fs}px/1.1 'Noto Sans KR',serif;color:#12296b;text-align:center;min-width:170px">${lines.map(esc).join('<br>')}</div><img src="${IMG.racket}" alt="" style="height:120px"></div>`;
 }
+function pnSpan(id,loc){const sel=UI.sel===loc;return `<span class="pn${UI.swap?' sw':''}${sel?' sel':''}"${UI.swap?` data-loc="${loc}"`:''}>${esc(pname(byId(id)))}</span>`}
+function locArr(loc){const [r,k,c,tm,i]=loc.split('|');const rd=S.draw[+r];return {r:+r,i:+i,arr:k==='m'?rd.courts[+c].teams[+tm]:rd.rest}}
+function swapClick(loc){
+  if(!UI.sel){UI.sel=loc;renderDraw();return}
+  if(UI.sel===loc){UI.sel=null;renderDraw();return}
+  const a=locArr(UI.sel),b=locArr(loc);
+  if(a.r!==b.r){UI.sel=loc;renderDraw();const m=document.getElementById('saveMsg');if(m)m.textContent=t().swapRound;return}
+  const tmp=a.arr[a.i];a.arr[a.i]=b.arr[b.i];b.arr[b.i]=tmp;
+  UI.sel=null;renderDraw();autoSave();
+}
+function toggleSwap(){UI.swap=!UI.swap;UI.sel=null;renderDraw()}
+document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('.pn.sw');if(n&&n.dataset.loc)swapClick(n.dataset.loc)});
 function sheetHTML(){
   const L=t(),sel=selPlayers();
-  const nm=a=>a.map(id=>esc(pname(byId(id)))).join(' · ');
+  const nm=(a,r,c,tm)=>a.map((id,i)=>pnSpan(id,r+'|m|'+c+'|'+tm+'|'+i)).join(' · ');
   const title=S.title||L.drawTitle;
   let g=`<div class="sh-grid" style="grid-template-columns:96px repeat(${S.nCourts},minmax(0,1fr)) 150px">`;
   g+=`<div class="hc h0">${L.roundH}</div>`;
@@ -497,12 +513,12 @@ function sheetHTML(){
       const v=(S.scores[r+'-'+c]||['',''])
       const inp=(i,dis)=>`<input inputmode="numeric" maxlength="2" data-k="${r}-${c}" data-i="${i}" value="${esc(v[i])}" ${dis?'disabled':''}>`;
       if(m){
-        g+=`<div class="mc"><div class="tm">${nm(m.teams[0])} <i>VS</i> ${nm(m.teams[1])}</div><div class="scr">SCORE ${inp(0)} : ${inp(1)}</div></div>`;
+        g+=`<div class="mc"><div class="tm">${nm(m.teams[0],r,c,0)} <i>VS</i> ${nm(m.teams[1],r,c,1)}</div><div class="scr">SCORE ${inp(0)} : ${inp(1)}</div></div>`;
       }else{
         g+=`<div class="mc off"><div class="tm">-</div><div class="scr">SCORE ${inp(0,1)} : ${inp(1,1)}</div></div>`;
       }
     }
-    g+=`<div class="rs">${rd.rest.length?rd.rest.map(id=>esc(pname(byId(id)))).join(', '):'-'}</div>`;
+    g+=`<div class="rs">${rd.rest.length?rd.rest.map((id,i)=>pnSpan(id,r+'|r|0|0|'+i)).join(', '):'-'}</div>`;
   });
   g+='</div>';
   return `<div class="sheet" id="sheet">
@@ -564,6 +580,72 @@ function playerCards(){
 function clearSearch(){UI.plQuery='';const i=document.getElementById('plSearch');if(i){i.value='';i.focus()}refreshPlayers()}
 function refreshPlayers(){const cb=document.getElementById('plClear');if(cb)cb.hidden=!UI.plQuery;const el=document.getElementById('plList');if(el)el.innerHTML=playerCards();const c=document.getElementById('plCount');if(c){const q=UI.plQuery.trim();c.textContent=q?t().shown(S.players.filter(p=>((p.ko||'')+' '+(p.en||'')).toLowerCase().includes(q.toLowerCase())).length,S.players.length):''}}
 function setSort(v){UI.plSort=v;renderPanel()}
+function toMin(h,m){h=+h;m=+(m||0);if(h>=12)h-=12;return h*60+m}
+function parseRoster(text){
+  const out=[],skipRe=/불참|취소|못\s*감|결석|\bx\b/i;
+  const find=name=>{
+    const q=name.trim().toLowerCase();if(!q)return null;
+    let f=S.players.find(p=>(p.ko||'').toLowerCase()===q||(p.en||'').toLowerCase()===q);if(f)return f;
+    if(q.length>=2){const c=S.players.filter(p=>{const k=(p.ko||'').toLowerCase(),e=(p.en||'').toLowerCase();return (k.length>=2&&(q.includes(k)||k.includes(q)))||(e.length>=3&&(q.includes(e)||e.includes(q)))});if(c.length===1)return c[0]}
+    return null;
+  };
+  const noise=/^(참석|참가|확인|명단|출석|오늘|참석자|참가자|불참|불참자|[월화수목금토일]요일|\d+월|\d+일|\d+월\s*\d+일|\d+)$/;
+  const add=(nm,hint,raw,skip)=>{nm=(nm||'').replace(/불참|취소|결석|못\s*감/g,'').trim();if(!nm||noise.test(nm))return;const p=skip?null:find(nm);out.push({raw,name:nm,id:p?p.id:null,hint,skip:!!skip,add:!p&&!skip&&/^[가-힣A-Za-z]{2,8}$/.test(nm)})};
+  text.split(/\r?\n/).forEach(line=>{
+    line=line.replace(/^\s*[\[(]?\d{1,2}\s*[.)\]]\s*/,'').replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,' ');
+    line.split(/[,，/、·ㆍ•]+|\s{2,}/).forEach(tk=>{
+      tk=tk.trim();if(!tk)return;
+      const skip=skipRe.test(tk),hint={};let nm=tk,m;
+      if(m=nm.match(/(\d)\s*[-~]\s*(\d)\s*R/i)){hint.rounds=[];for(let r=+m[1]-1;r<=+m[2]-1;r++)hint.rounds.push(r);nm=nm.replace(m[0],' ')}
+      if(m=nm.match(/(\d)\s*R\s*부터/i)){hint.fromR=+m[1]-1;nm=nm.replace(m[0],' ')}
+      if(m=nm.match(/(\d)\s*R\s*까지/i)){hint.toR=+m[1]-1;nm=nm.replace(m[0],' ')}
+      if(m=nm.match(/~\s*(\d{1,2})(?::(\d{2}))?\s*시?|(\d{1,2})(?::(\d{2}))?\s*시\s*(?:까지|퇴장|조퇴)/)){hint.endMin=m[1]?toMin(m[1],m[2]):toMin(m[3],m[4]);nm=nm.replace(m[0],' ')}
+      if(m=nm.match(/(\d{1,2})\s*시(?:\s*(\d{2})\s*분)?\s*(?:부터|도착|시작)?|\b(\d{1,2}):(\d{2})\b/)){hint.startMin=m[1]?toMin(m[1],m[2]):toMin(m[3],m[4]);nm=nm.replace(m[0],' ')}
+      nm=nm.replace(/[()\[\]{}~]/g,' ').replace(/\s+/g,' ').trim();
+      if(!nm)return;
+      if(find(nm)||!nm.includes(' ')||skip){add(nm,hint,tk,skip)}
+      else nm.split(' ').forEach(w=>add(w,{},tk,false));
+    });
+  });
+  const seen={};return out.filter(x=>{if(x.id==null)return true;if(seen[x.id])return false;seen[x.id]=1;return true});
+}
+function hintText(h){const a=[];if(h.rounds)a.push(h.rounds.map(r=>r+1).join(',')+'R');if(h.fromR!=null)a.push((h.fromR+1)+'R~');if(h.toR!=null)a.push('~'+(h.toR+1)+'R');if(h.startMin!=null)a.push(fmtT(h.startMin)+'~');if(h.endMin!=null)a.push('~'+fmtT(h.endMin));return a.join(' ')}
+function runPaste(){UI.pasteRes=parseRoster(UI.pasteText);renderPanel()}
+function togPasteAdd(i){UI.pasteRes[i].add=!UI.pasteRes[i].add;renderPanel()}
+function applyPaste(){
+  const L=t(),res=UI.pasteRes||[];if(!res.length){return}
+  let nSel=0,nNew=0;
+  if(UI.pasteReplace)S.players.forEach(p=>p.sel=false);
+  if(UI.pasteReset)S.players.forEach(p=>{p.from=null;p.to=null;p.rounds=null});
+  const lastStart=m=>{let r=-1;S.sched.forEach((x,i)=>{if(x.s<m)r=i});return r};
+  res.forEach((x,i)=>{
+    if(x.skip)return;
+    let p=x.id!=null?byId(x.id):null;
+    if(!p&&x.add){p={id:Date.now()+i,ko:x.name,en:x.name,level:0,sel:true,start:300,from:null,to:null,rounds:null,custom:true};S.players.push(p);nNew++}
+    if(!p)return;
+    p.sel=true;nSel++;
+    const h=x.hint||{};
+    if(h.rounds)p.rounds=h.rounds.filter(r=>r>=0&&r<S.nRounds);
+    if(h.fromR!=null)p.from=h.fromR;
+    if(h.startMin!=null)p.from=(h.startMin===S.defStartMin)?null:firstRoundAtOrAfter(h.startMin);
+    if(h.toR!=null)p.to=h.toR;
+    if(h.endMin!=null){const r=lastStart(h.endMin);p.to=(r>=S.nRounds-1)?null:Math.max(0,r)}
+  });
+  S.draw=null;UI.pasteRes=null;UI.pasteText='';UI.pasteOpen=false;save();renderPanel();
+  setTimeout(()=>{const m=document.getElementById('plCount');if(m)m.textContent=L.pasteDone(nSel,nNew)},0);
+}
+function pasteHTML(){
+  const L=t();
+  if(!UI.pasteOpen)return `<div class="row"><button class="btn" onclick="UI.pasteOpen=true;renderPanel()">📋 ${L.pasteBtn}</button></div>`;
+  const res=UI.pasteRes;
+  let tb='';
+  if(res)tb=`<div style="overflow:auto;margin-top:8px"><table class="st"><tr><th style="text-align:left">${L.pl}</th><th></th><th></th></tr>${res.map((x,i)=>{
+    const st=x.skip?`<span class="note">${L.pasteSkip}</span>`:x.id!=null?`<span style="color:#1a7f37">✓ ${esc(pname(byId(x.id)))}</span>`:`<label><input type="checkbox" ${x.add?'checked':''} onchange="togPasteAdd(${i})"> ${L.pasteRegister}</label>`;
+    return `<tr><td style="text-align:left">${esc(x.name)}</td><td>${st}</td><td>${esc(hintText(x.hint||{}))}</td></tr>`}).join('')}</table></div>`;
+  return `<div class="paste"><textarea id="pasteTa" placeholder="${esc(L.pastePh)}" oninput="UI.pasteText=this.value">${esc(UI.pasteText)}</textarea>
+  <div class="row"><button class="btn pri" onclick="runPaste()">${L.pasteRun}</button><button class="btn" onclick="UI.pasteOpen=false;UI.pasteRes=null;renderPanel()">${L.pasteClose}</button></div>${tb}
+  ${res?`<div class="row"><label style="min-width:auto"><input type="checkbox" ${UI.pasteReplace?'checked':''} onchange="UI.pasteReplace=this.checked"> ${L.pasteReplace}</label><label style="min-width:auto"><input type="checkbox" ${UI.pasteReset?'checked':''} onchange="UI.pasteReset=this.checked"> ${L.pasteReset}</label></div><div class="row"><button class="btn pri" onclick="applyPaste()">${L.pasteApply}</button></div>`:''}</div>`;
+}
 function previewHTML(){
   const L=t(),sp=selPlayers();
   const rows=S.sched.map((x,r)=>{
@@ -584,6 +666,7 @@ function renderPanel(){
     <div class="row"><label>${L.lenBefore}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenA,'setLenA')}</div>
     <div class="row"><label>${L.lenAfter}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenB,'setLenB')}</div>
     <p class="note" style="margin:0 0 10px">${L.rounds}: <b>${S.nRounds}</b> · ${L.roundsAuto} ${L.lateHint}</p>
+    ${pasteHTML()}
     <div class="row"><button class="btn" onclick="selAll(true)">${L.all}</button><button class="btn" onclick="selAll(false)">${L.none}</button><div style="position:relative;flex:1;min-width:200px"><input type="text" id="plSearch" placeholder="${L.searchPh}" value="${esc(UI.plQuery)}" oninput="UI.plQuery=this.value;refreshPlayers()" style="width:100%;padding-right:34px"><button id="plClear" aria-label="${L.none}" onclick="clearSearch()" ${UI.plQuery?'':'hidden'} style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:0;border-radius:50%;background:#dfe4ee;color:#444;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button></div>${seg([['none',L.sortOrder],['asc',L.sortAsc],['desc',L.sortDesc]],UI.plSort,'setSort')}<span class="note" id="plCount"></span></div>
     <div class="pl" id="plList">${playerCards()}</div>
     <h3 style="margin:20px 0 0;font-size:15px">${L.newPlayer}</h3>
@@ -642,7 +725,7 @@ function renderPanel(){
 function renderDraw(){
   const L=t(),el=$('#drawArea');
   if(S.step!==3||!S.draw){el.innerHTML='';return}
-  el.innerHTML=`<div class="row noprint"><button class="btn" onclick="go(2)">${L.back}</button><button class="btn" onclick="doGen()">${L.shuffle}</button><button class="btn pri" onclick="dlPdf()" id="pdfBtn">${L.pdf}</button><button class="btn" onclick="printSheet()">${L.print}</button></div>
+  el.innerHTML=`<div class="row noprint"><button class="btn" onclick="go(2)">${L.back}</button><button class="btn" onclick="doGen()">${L.shuffle}</button><button class="btn pri" onclick="dlPdf()" id="pdfBtn">${L.pdf}</button><button class="btn" onclick="printSheet()">${L.print}</button><button class="btn ${UI.swap?'pri':''}" onclick="toggleSwap()">⇄ ${UI.swap?L.swapDone:L.swapBtn}</button>${UI.swap?`<span class="note">${L.swapOn}</span>`:''}</div>
   <div class="row noprint"><label style="min-width:auto">${L.dateLbl}</label><input type="date" value="${S.saveDate}" onchange="S.saveDate=this.value;save();autoSave()"><span id="saveMsg" class="note">${L.autoSaved}</span></div>
   <details class="card noprint" id="drawListCard"><summary style="cursor:pointer;font-weight:700">${L.savedDraws} (<span id="drawCount">${S.draws.length}</span>)</summary><div id="drawList" style="margin-top:8px"></div></details>
   <div class="sheetbox" id="sheetbox"><div class="scaler" id="scaler">${sheetHTML()}</div></div>
@@ -747,8 +830,9 @@ $('#l-en').onclick=()=>{S.lang='en';renderAll()};
 $('#l-ko').onclick=()=>{S.lang='ko';renderAll()};
 window.addEventListener('resize',fitSheet);
 
-function printSheet(){pushDraw();window.print()}
+function printSheet(){if(UI.swap){UI.swap=false;UI.sel=null;renderDraw()}pushDraw();window.print()}
 async function dlPdf(){
+  if(UI.swap){UI.swap=false;UI.sel=null;renderDraw();await new Promise(r=>setTimeout(r,50))}
   const btn=$('#pdfBtn'),L=t(),sc=$('#scaler'),el=$('#sheet');
   btn.textContent=L.makingPdf;
   const prev=sc.style.transform;sc.style.transform='none';
