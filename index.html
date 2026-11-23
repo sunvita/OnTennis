@@ -390,7 +390,7 @@ function buildSched(){
   return out;
 }
 function fitCount(){let n=1,t=S.startMin;while(n<12){const len=t<300?S.roundLenA:S.roundLenB;if(t+len+(S.roundLenA===S.roundLenB?len:20)<=S.endMin){n++;t+=len}else break}return n}
-function recompute(){S.nRounds=Math.max(1,Math.min(12,S.nRounds||7));S.sched=buildSched();if(S.cwin&&S.avail&&S.avail.length)applyAllWindows()}
+function recompute(){if(!S.roundsManual)S.nRounds=fitCount();S.nRounds=Math.max(1,Math.min(12,S.nRounds||7));S.sched=buildSched();if(S.cwin&&S.avail&&S.avail.length)applyAllWindows()}
 recompute();
 const rStart=r=>S.sched[r].s,rEnd=r=>S.sched[r].e;
 function firstRoundAtOrAfter(m){const i=S.sched.findIndex(x=>x.s>=m);return i<0?0:i}
@@ -421,7 +421,7 @@ function normShapes(){
   if(S.sched&&S.cwin.some(w=>w.from!=null||w.to!=null)){applyAllWindows();S.cwin=S.cwin.map(()=>({from:null,to:null}))}
   if(S.defStartMin==null)S.defStartMin=300;
   S.coach=[0,1,2,3,4].map(i=>(S.coach&&S.coach[i])||'');if(!S.lessons)S.lessons={};
-  if(!S.roundsManual)S.nRounds=7;
+  if(!S.roundsManual)S.nRounds=fitCount();
   S.nRounds=Math.max(1,Math.min(12,S.nRounds||7));
 }
 function applyWindow(c){const w=S.cwin[c];if(!w||(w.from==null&&w.to==null))return;S.sched.forEach((x,r)=>{S.avail[r][c]=(w.from==null||x.s>=w.from)&&(w.to==null||x.s<w.to)})}
@@ -689,7 +689,8 @@ function renderPanel(){
     h=`<div class="card"><h2>${L.c_h}</h2><p class="hint">${L.c_hint}</p>
     <div class="row"><label>${L.courts}</label>${stepper(S.nCourts,'setCourts(-1)','setCourts(1)')}</div>
     <div class="row" style="flex-wrap:nowrap"><label style="min-width:auto">${L.sessionStart}</label><select onchange="setSessionStart(this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([240,300],S.startMin)}</select>
-    <label style="min-width:auto;margin-left:6px">${L.endTime}</label><select onchange="setEnd(this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([360,420,480,540],S.endMin)}</select><label style="min-width:auto;margin-left:6px">${L.lenOne}</label>${seg([[20,'20'],[25,'25'],[30,'30']],S.roundLenA===S.roundLenB?S.roundLenA:null,'setLen')}<span class="note">${L.min}</span></div>
+    <label style="min-width:auto;margin-left:6px">${L.endTime}</label><select onchange="setEnd(this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([360,420,480,540],S.endMin)}</select></div>
+    <div class="row"><label>${L.lenOne}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenA===S.roundLenB?S.roundLenA:null,'setLen')}</div>
     ${Array.from({length:S.nCourts},(_,c)=>`<div class="row"><label style="min-width:auto"><span class="cdot" style="background:${CCOL[c]}"></span>${L.courtNo}</label><input type="number" min="1" max="99" value="${S.cnum[c]}" style="width:64px" onchange="setCnum(${c},this.value)">${seg([['singles',L.singles],['doubles',L.doubles],['lesson',L.lesson]],S.types[c],`setType.bind(null,${c})`)}${S.types[c]==='lesson'?`<input type="text" placeholder="${L.coachPh}" value="${esc(S.coach[c])}" style="width:110px" onchange="setCoach(${c},this.value)">`:''}</div>${S.types[c]==='lesson'?`<div class="lesson-box"><b style="color:#4a2f9c">${L.lessonTime}</b> <span class="note">${L.lessonTap}</span><div class="lchips">${S.sched.map((x,r)=>`<button class="lchip ${(S.lset[c]||[]).includes(r)?'on':''}" onclick="togL(${c},${r})">${r+1}R<small>${fmtT(x.s)}</small></button>`).join('')}</div><div class="note" style="margin-top:6px">${(()=>{const rs=S.sched.map((x,r)=>r).filter(r=>isLesson(c,r));return rs.length?`${rangeTxt(rs)} · ${fmtT(S.sched[rs[0]].s)}~${fmtT(S.sched[rs[rs.length-1]].e)} · ${L.lessonOutside}`:L.lessonNone2})()}</div></div>`:''}`).join('')}
     <div class="row"><label>${L.extraR}</label>${tog(S.extra,"togF('extra')")}</div>
     <p class="note" style="margin:-2px 0 8px">${L.extraHint}</p>
@@ -840,7 +841,7 @@ function setRounds(d){S.nRounds=Math.max(1,Math.min(12,S.nRounds+d));S.roundsMan
 function fitRounds(){S.nRounds=fitCount();S.roundsManual=true;recompute();S.draw=null;save();renderPanel()}
 function setType(c,v){S.types[c]=v;S.draw=null;renderAll()}
 function togA(r,c){S.avail[r][c]=!S.avail[r][c];S.draw=null;renderPanel()}
-function setLen(v){S.roundLenA=S.roundLenB=+v;recompute();S.draw=null;save();renderPanel()}
+function setLen(v){S.roundLenA=S.roundLenB=+v;S.roundsManual=false;recompute();S.draw=null;save();renderPanel()}
 function togL(c,r){const a=S.lset[c],i=a.indexOf(r);if(i<0){a.push(r);a.sort((x,y)=>x-y)}else a.splice(i,1);S.draw=null;save();renderPanel()}
 function rangeTxt(a){const o=[];let i=0;while(i<a.length){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(j>i?`${a[i]+1}~${a[j]+1}R`:`${a[i]+1}R`);i=j+1}return o.join(', ')}
 function sumHTML(){
