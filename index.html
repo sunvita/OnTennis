@@ -77,6 +77,10 @@ input[type=text],input[type=password],input[type=number]{border:1px solid #b8c1d
 .tg.on{background:var(--acc)}.tg.on::after{left:19px}
 table.av{border-collapse:collapse}
 table.av th,table.av td{border:1px solid var(--line);padding:6px 12px;text-align:center}
+table.av td{text-align:center}
+.av3{min-width:44px;padding:4px 8px;border-radius:8px;border:1px solid #b8c1d6;background:#eef0f4;color:#888;font:inherit;font-size:13px;cursor:pointer}
+.av3.on{background:#e3f1ff;border-color:#7aa7e6;color:#1f3fc0}
+.av3.les{background:#efe8ff;border-color:#7c5cc4;color:#4a2f9c;font-weight:700}
 table.av th{background:#f0f3fa;font-weight:500}
 .note{font-size:13px;color:var(--mut)}
 .err{color:#b3261e;font-size:13px}
@@ -100,6 +104,12 @@ table.st td:nth-child(2),table.st th:nth-child(2){text-align:left}
 .sh-info .box{border:2px solid var(--navy);border-radius:10px;padding:8px 12px;font-size:16px;font-weight:500;display:flex;align-items:center;line-height:1.5}
 .sh-grid{display:grid;gap:4px;margin-top:8px}
 .sh-grid>div{border-radius:4px}
+.sh-grid.wide .hc{font-size:20px}
+.sh-grid.wide .rc b{font-size:30px}
+.sh-grid.wide .rs{font-size:16px}
+.sh-grid.wide .mc{padding:8px 3px 6px}
+.sh-grid.wide .scr{gap:3px;font-size:11px}
+.sh-grid.wide .scr input{width:38px;height:28px;font-size:15px}
 .hc{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;height:52px}
 .h0{background:var(--navy);color:#fff}
 .hr{background:#fbeeb0;color:#5c4a05}
@@ -126,7 +136,7 @@ table.st td:nth-child(2),table.st th:nth-child(2){text-align:left}
 .sh-foot .lg img{height:135px}
 
 @media print{
-  @page{margin:8mm}
+  @page{size:A4 portrait;margin:8mm}
   .noprint{display:none!important}
   body{background:#fff}.wrap{padding:0;max-width:none}
   .sheetbox{height:auto!important;overflow:visible}
@@ -256,7 +266,7 @@ async function changePw(){
     m.textContent=L.pwDone;$('#pwCur').value=$('#pwNew').value=$('#pwNew2').value='';
   }catch(e){m.textContent=String(e.message||e);m.className='err'}
 }
-const SET_KEYS=['coach','lessons','nRounds','roundsManual','cnum','cwin','defStartMin','nCourts','types','avail','scoring','games','levelMode','rotate','avoidOpp','fair','club','title','startMin','endMin','roundLenA','roundLenB','notesCustom','rc'];
+const SET_KEYS=['coach','lessons','nRounds','roundsManual','cnum','cwin','lsn','defStartMin','nCourts','types','avail','scoring','games','levelMode','rotate','avoidOpp','fair','club','title','startMin','endMin','roundLenA','roundLenB','notesCustom','rc'];
 function setCloud(st){cloud.st=st;updateCloudUI()}
 function updateCloudUI(){
   const b=document.getElementById('cloud');if(!b)return;
@@ -270,8 +280,14 @@ function scheduleSync(){
   clearTimeout(cloud.timer);cloud.timer=setTimeout(pushState,1500);
 }
 const plRow=p=>({id:p.id,ko:p.ko,en:p.en,level:p.level,start_min:300,from_round:p.from==null?null:p.from,to_round:p.to==null?null:p.to,rounds:p.rounds||null,aliases:p.aliases&&p.aliases.length?p.aliases:null,custom:!!p.custom,sel:!!p.sel});
-async function pushState(){
-  cloud.timer=null;if(!cloud.on||!cloud.ready)return;
+const localSig=()=>{const st={};SET_KEYS.forEach(k=>st[k]=S[k]);return JSON.stringify([S.players.map(plRow),st])};
+function pushState(){
+  clearTimeout(cloud.timer);cloud.timer=null;
+  cloud.pushing=(cloud.pushing||Promise.resolve()).then(doPush);
+  return cloud.pushing;
+}
+async function doPush(){
+  if(!cloud.on||!cloud.ready)return;
   const settings={};SET_KEYS.forEach(k=>settings[k]=S[k]);
   const sig=JSON.stringify([S.players.map(plRow),settings]);
   if(sig===cloud.last)return;
@@ -321,10 +337,17 @@ async function pull(){
   if(!cloud.on||!session||cloud.busy)return;cloud.busy=true;
   try{
     setCloud('sync');
+    // never overwrite local edits that have not reached the server yet: flush them first
+    if(cloud.ready&&localSig()!==cloud.last){
+      await pushState();
+      if(localSig()!==cloud.last){cloud.busy=false;setCloud('err');return}
+    }
     const [pl,mt,st,lc]=await Promise.all([rest('tennis_players?select=*&order=id'),rest('tennis_matches?select=*&order=id'),rest('tennis_settings?select=*'),rest('tennis_level_changes?select=*&order=id.desc&limit=200')]);
     if(!pl.length&&!mt.length&&!st.length){
       cloud.last='';cloud.ready=true;await pushState();
       if(S.history.length)await rest('tennis_matches',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(S.history.map(mRow))});
+    }else if(cloud.ready&&localSig()!==cloud.last){
+      cloud.busy=false;scheduleSync();setCloud('sync');return;
     }else{
       cloud.applying=true;
       if(pl.length)S.players=pl.map(p=>({id:p.id,ko:p.ko,en:p.en,level:+p.level,start:300,from:(p.from_round!=null?p.from_round:(p.start_min!==300?firstRoundAtOrAfter(p.start_min):null)),to:p.to_round,rounds:p.rounds,aliases:p.aliases||null,custom:p.custom,sel:p.sel}));
@@ -363,7 +386,8 @@ const rStart=r=>S.sched[r].s,rEnd=r=>S.sched[r].e;
 function firstRoundAtOrAfter(m){const i=S.sched.findIndex(x=>x.s>=m);return i<0?0:i}
 const defFrom=()=>firstRoundAtOrAfter(S.defStartMin);
 const lessonOf=(c,r)=>((S.lessons[c]||{})[r]||[]);
-function inLesson(id,r){for(let c=0;c<S.nCourts;c++)if(S.types[c]==='lesson'&&S.avail[r]&&S.avail[r][c]&&lessonOf(c,r).includes(id))return true;return false}
+const isLesson=(c,r)=>!!(S.avail[r]&&S.avail[r][c]&&S.lsn[r]&&S.lsn[r][c]);
+function inLesson(id,r){for(let c=0;c<S.nCourts;c++)if(isLesson(c,r)&&lessonOf(c,r).includes(id))return true;return false}
 function eligible(p,r){if(p.rounds)return p.rounds.includes(r);const f=p.from==null?defFrom():p.from;return r>=f&&(p.to==null||r<=p.to)}
 function firstRound(p){if(p.rounds)return p.rounds.length?Math.min(...p.rounds):99;return p.from==null?defFrom():p.from}
 const hourOpts=(list,cur,blank)=>(blank!==undefined?`<option value="" ${cur==null?'selected':''}>${blank}</option>`:'')+list.map(m=>`<option value="${m}" ${cur===m?'selected':''}>${fmtT(m)}</option>`).join('');
@@ -372,6 +396,8 @@ function toOpts(p){const L=t();return `<option value="" ${p.to==null?'selected':
 function normShapes(){
   while(S.types.length<5)S.types.push('doubles');
   const old=S.avail||[];S.avail=Array.from({length:20},(_,r)=>Array.from({length:5},(_,c)=>(old[r]&&old[r][c]!==undefined)?old[r][c]:true));
+  const oldL=S.lsn||[];S.lsn=Array.from({length:20},(_,r)=>Array.from({length:5},(_,c)=>!!(oldL[r]&&oldL[r][c])));
+  S.types.forEach((ty,c)=>{if(ty==='lesson'){S.types[c]='doubles';for(let r=0;r<20;r++)S.lsn[r][c]=true}});
   S.cnum=[1,2,3,4,5].map((d,i)=>(S.cnum&&S.cnum[i])||d);
   S.cwin=Array.from({length:5},(_,i)=>(S.cwin&&S.cwin[i])||{from:null,to:null});
   if(S.defStartMin==null)S.defStartMin=300;
@@ -394,7 +420,7 @@ const pname=p=>(S.lang==='ko'?p.ko||p.en:p.en||p.ko);
 const selPlayers=()=>S.players.filter(p=>p.sel);
 const byId=id=>S.players.find(p=>p.id===id);
 
-function capacity(r){let n=0;for(let c=0;c<S.nCourts;c++)if(S.avail[r][c]&&S.types[c]!=='lesson')n+=S.types[c]==='doubles'?4:2;return n}
+function capacity(r){let n=0;for(let c=0;c<S.nCourts;c++)if(S.avail[r][c]&&!isLesson(c,r))n+=S.types[c]==='doubles'?4:2;return n}
 
 /* ---------- generation ---------- */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -411,7 +437,7 @@ function generate(){
     const layout=[];let remaining=elig.length;
     for(let c=0;c<S.nCourts;c++){
       if(!S.avail[r][c]){layout.push(null);continue}
-      if(S.types[c]==='lesson'){layout.push({c,type:'lesson',size:0});continue}
+      if(isLesson(c,r)){layout.push({c,type:'lesson',size:0});continue}
       const ty=S.types[c],size=ty==='doubles'?4:2;
       if(remaining>=size){layout.push({c,type:ty,size});remaining-=size}
       else if(ty==='doubles'&&remaining>=2){layout.push({c,type:'singles',size:2});remaining-=2}
@@ -510,9 +536,10 @@ function sheetHTML(){
   const L=t(),sel=selPlayers();
   const nm=(a,r,c,tm)=>a.map((id,i)=>pnSpan(id,r+'|m|'+c+'|'+tm+'|'+i)).join(' · ');
   const title=S.title||L.drawTitle;
-  let g=`<div class="sh-grid" style="grid-template-columns:96px repeat(${S.nCourts},minmax(0,1fr)) 150px">`;
+  const wide=S.nCourts>=5;
+  let g=`<div class="sh-grid${wide?' wide':''}" style="grid-template-columns:${wide?'72px':'96px'} repeat(${S.nCourts},minmax(0,1fr)) ${wide?'92px':'150px'}">`;
   g+=`<div class="hc h0">${L.roundH}</div>`;
-  for(let c=0;c<S.nCourts;c++)g+=`<div class="hc" style="background:${CCOL[c]}">${L.courtH(S.cnum[c])}${S.types[c]==='lesson'?' <small style="font-size:14px">('+L.lesson+')</small>':''}</div>`;
+  for(let c=0;c<S.nCourts;c++)g+=`<div class="hc" style="background:${CCOL[c]}">${L.courtH(S.cnum[c])}</div>`;
   g+=`<div class="hc hr">${L.rest}</div>`;
   S.draw.forEach((rd,r)=>{
     g+=`<div class="rc"><b>${r+1}R</b><span>ROUND</span><em style="font-style:normal;font-size:12px;margin-top:3px;opacity:.85">${fmtT(rStart(r))}~${fmtT(rEnd(r))}</em></div>`;
@@ -591,12 +618,12 @@ function clearSearch(){UI.plQuery='';const i=document.getElementById('plSearch')
 function refreshPlayers(){const cb=document.getElementById('plClear');if(cb)cb.hidden=!UI.plQuery;const el=document.getElementById('plList');if(el)el.innerHTML=playerCards();const c=document.getElementById('plCount');if(c){const q=UI.plQuery.trim();c.textContent=q?t().shown(S.players.filter(p=>((p.ko||'')+' '+(p.en||'')).toLowerCase().includes(q.toLowerCase())).length,S.players.length):''}}
 function setSort(v){UI.plSort=v;renderPanel()}
 function lessonCardHTML(){
-  const L=t(),cs=[];for(let c=0;c<S.nCourts;c++)if(S.types[c]==='lesson')cs.push(c);
+  const L=t(),cs=[];for(let c=0;c<S.nCourts;c++)if(S.sched.some((x,r)=>isLesson(c,r)))cs.push(c);
   if(!cs.length)return '';
   const sp=selPlayers();
   const body=cs.map(c=>{
     const rows=S.sched.map((x,r)=>{
-      if(!S.avail[r][c])return '';
+      if(!isLesson(c,r))return '';
       const mem=lessonOf(c,r),key=c+'-'+r,open=UI.lessonOpen===key;
       return `<div class="row" style="align-items:flex-start;border-top:1px solid var(--line);padding-top:8px"><label style="min-width:110px"><b>${r+1}R</b> <span class="note">${fmtT(x.s)}~${fmtT(x.e)}</span></label>
       <div style="flex:1;min-width:200px"><div>${mem.length?mem.filter(id=>byId(id)).map(id=>`<span class="chip later">${esc(pname(byId(id)))}</span>`).join(' '):`<span class="note">${L.lessonNone}</span>`}</div>
@@ -610,14 +637,14 @@ function setCoach(c,v){S.coach[c]=v.trim();S.draw=null;save();renderPanel()}
 function toggleLesson(c,r,id){const a=((S.lessons[c]=S.lessons[c]||{})[r]=S.lessons[c][r]||[]);const i=a.indexOf(id);if(i<0)a.push(id);else a.splice(i,1);S.draw=null;save();renderPanel()}
 function copyLesson(c,r,all){
   S.lessons[c]=S.lessons[c]||{};
-  if(all){const src=(S.lessons[c][r]||[]).slice();S.sched.forEach((x,i)=>{if(S.avail[i][c])S.lessons[c][i]=src.slice()})}
-  else{let p=r-1;while(p>=0&&!S.avail[p][c])p--;if(p>=0)S.lessons[c][r]=(S.lessons[c][p]||[]).slice()}
+  if(all){const src=(S.lessons[c][r]||[]).slice();S.sched.forEach((x,i)=>{if(isLesson(c,i))S.lessons[c][i]=src.slice()})}
+  else{let p=r-1;while(p>=0&&!isLesson(c,p))p--;if(p>=0)S.lessons[c][r]=(S.lessons[c][p]||[]).slice()}
   S.draw=null;save();renderPanel();
 }
 function previewHTML(){
   const L=t(),sp=selPlayers();
   const rows=S.sched.map((x,r)=>{
-    const open=[];for(let c=0;c<S.nCourts;c++)if(S.avail[r][c])open.push(S.cnum[c]+(S.types[c]==='lesson'?'(레슨)':''));
+    const open=[];for(let c=0;c<S.nCourts;c++)if(S.avail[r][c])open.push(S.cnum[c]+(isLesson(c,r)?'(레슨)':''));
     const slots=capacity(r),pl=sp.filter(p=>eligible(p,r)&&!inLesson(p.id,r)).length,rest=Math.max(0,pl-slots),empty=Math.max(0,slots-pl);
     const warn=(!pl||!slots||empty>0);
     return `<tr${warn?' style="background:#fff4dc"':''}><td>${r+1}R</td><td>${fmtT(x.s)}~${fmtT(x.e)}</td><td>${open.join(', ')||'-'}</td><td>${slots}</td><td>${pl}</td><td>${rest}</td><td>${empty||''}</td></tr>`}).join('');
@@ -646,11 +673,11 @@ function renderPanel(){
     <div class="row"><label>${L.lenAfter}</label>${seg([[20,'20 '+L.min],[25,'25 '+L.min],[30,'30 '+L.min]],S.roundLenB,'setLenB')}</div>
     <div class="row"><label>${L.rounds}</label>${stepper(S.nRounds,'setRounds(-1)','setRounds(1)')}<button class="btn" onclick="fitRounds()">${L.fitBtn}</button></div>
     <p class="note" style="margin:0 0 6px">${L.roundsAuto}</p>
-    ${Array.from({length:S.nCourts},(_,c)=>`<div class="row"><label style="min-width:auto"><span class="cdot" style="background:${CCOL[c]}"></span>${L.courtNo}</label><input type="number" min="1" max="99" value="${S.cnum[c]}" style="width:64px" onchange="setCnum(${c},this.value)">${seg([['singles',L.singles],['doubles',L.doubles],['lesson',L.lesson]],S.types[c],`setType.bind(null,${c})`)}${S.types[c]==='lesson'?`<input type="text" placeholder="${L.coachPh}" value="${esc(S.coach[c])}" style="width:110px" onchange="setCoach(${c},this.value)">`:''}<label style="min-width:auto">${L.cw}</label><select onchange="setCwin(${c},'from',this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([240,300,360,420,480],S.cwin[c].from,L.cwAll)}</select><span>~</span><select onchange="setCwin(${c},'to',this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([300,360,420,480,540],S.cwin[c].to,L.cwAll)}</select></div>`).join('')}
+    ${Array.from({length:S.nCourts},(_,c)=>`<div class="row"><label style="min-width:auto"><span class="cdot" style="background:${CCOL[c]}"></span>${L.courtNo}</label><input type="number" min="1" max="99" value="${S.cnum[c]}" style="width:64px" onchange="setCnum(${c},this.value)">${seg([['singles',L.singles],['doubles',L.doubles]],S.types[c],`setType.bind(null,${c})`)}${S.sched.some((x,r)=>isLesson(c,r))?`<input type="text" placeholder="${L.coachPh}" value="${esc(S.coach[c])}" style="width:110px" onchange="setCoach(${c},this.value)">`:''}<label style="min-width:auto">${L.cw}</label><select onchange="setCwin(${c},'from',this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([240,300,360,420,480],S.cwin[c].from,L.cwAll)}</select><span>~</span><select onchange="setCwin(${c},'to',this.value)" style="padding:7px;border-radius:8px;border:1px solid #b8c1d6;font:inherit">${hourOpts([300,360,420,480,540],S.cwin[c].to,L.cwAll)}</select></div>`).join('')}
     </div>
     <div class="card"><h2>${L.avail}</h2><p class="hint">${L.fits}: ${Math.min(...cap)}${Math.min(...cap)!==Math.max(...cap)?'–'+Math.max(...cap):''}</p>
     <div style="overflow:auto"><table class="av"><tr><th>${L.round}</th>${Array.from({length:S.nCourts},(_,c)=>`<th style="background:${CCOL[c]}">${L.courtH(S.cnum[c])}</th>`).join('')}<th>${L.fits}</th></tr>
-    ${Array.from({length:S.nRounds},(_,r)=>`<tr><th>${r+1}R</th>${Array.from({length:S.nCourts},(_,c)=>`<td><input type="checkbox" ${S.avail[r][c]?'checked':''} onchange="togA(${r},${c})"></td>`).join('')}<td>${cap[r]}</td></tr>`).join('')}</table></div></div>`;
+    ${Array.from({length:S.nRounds},(_,r)=>`<tr><th>${r+1}R</th>${Array.from({length:S.nCourts},(_,c)=>`<td><button class="av3 ${isLesson(c,r)?'les':S.avail[r][c]?'on':''}" onclick="togA(${r},${c})">${isLesson(c,r)?L.lesson:S.avail[r][c]?'●':'—'}</button></td>`).join('')}<td>${cap[r]}</td></tr>`).join('')}</table></div></div>`;
   }
   if(S.step===2){
     h=`<div class="card"><h2>${L.f_h}</h2><p class="hint">${L.lvlHint}</p>
@@ -781,7 +808,7 @@ function setCourts(d){S.nCourts=Math.max(1,Math.min(5,S.nCourts+d));S.draw=null;
 function setRounds(d){S.nRounds=Math.max(1,Math.min(12,S.nRounds+d));S.roundsManual=true;recompute();S.draw=null;save();renderPanel()}
 function fitRounds(){S.nRounds=fitCount();S.roundsManual=true;recompute();S.draw=null;save();renderPanel()}
 function setType(c,v){S.types[c]=v;S.draw=null;renderAll()}
-function togA(r,c){S.avail[r][c]=!S.avail[r][c];S.draw=null;renderPanel()}
+function togA(r,c){/* cycle: play -> lesson -> off */if(!S.avail[r][c]){S.avail[r][c]=true;S.lsn[r][c]=false}else if(!S.lsn[r][c])S.lsn[r][c]=true;else{S.lsn[r][c]=false;S.avail[r][c]=false}S.draw=null;renderPanel()}
 function setF(k,v){S[k]=v;S.draw=null;renderPanel()}
 function setNotes(v){S.notesCustom[S.lang]=v.split('\n').map(x=>x.trim()).filter(Boolean)}
 function resetNotes(){S.notesCustom[S.lang]=null;renderPanel()}
@@ -800,6 +827,13 @@ $('#l-en').onclick=()=>{S.lang='en';renderAll()};
 $('#l-ko').onclick=()=>{S.lang='ko';renderAll()};
 window.addEventListener('resize',fitSheet);
 
+function fitPrint(on){
+  const sc=$('#scaler'),el=$('#sheet');if(!sc||!el)return;
+  if(!on){sc.style.zoom='';return}
+  sc.style.zoom='';const k=Math.min(730/el.offsetWidth,1050/el.offsetHeight);sc.style.zoom=k;
+}
+window.addEventListener('beforeprint',()=>fitPrint(true));
+window.addEventListener('afterprint',()=>fitPrint(false));
 function printSheet(){if(UI.swap){UI.swap=false;UI.sel=null;renderDraw()}pushDraw();window.print()}
 async function dlPdf(){
   if(UI.swap){UI.swap=false;UI.sel=null;renderDraw();await new Promise(r=>setTimeout(r,50))}
