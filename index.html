@@ -157,6 +157,12 @@ table.st td:nth-child(2),table.st th:nth-child(2){text-align:left}
 .sheet.land .sh-foot{margin-top:6px;min-height:0;padding:4px 12px;gap:12px;border-width:1.5px}
 .sheet.land .sh-foot .bl img{height:34px}.sheet.land .sh-foot .bl b{font-size:17px}
 .sheet.land .sh-foot ul{font-size:13px;line-height:1.45;column-count:2;column-gap:24px;padding-left:18px}
+.sheet.land.nofoot .sh-foot{display:none}
+.sheet.land.tight .sh-head{height:54px}.sheet.land.tight .sh-head img{height:48px}.sheet.land.tight .sh-title{font-size:34px}.sheet.land.tight .sh-sub{font-size:15px;margin-top:0}
+.sheet.land.tight .sh-info .lab{font-size:14px}.sheet.land.tight .sh-info .box{font-size:12px;padding:2px 8px}
+.sheet.land.tight .hc{height:28px;font-size:16px}.sheet.land.tight .rc,.sheet.land.tight .mc{min-height:46px;padding-top:2px;padding-bottom:2px}
+.sheet.land.tight .rc b{font-size:20px}.sheet.land.tight .rc span{display:none}.sheet.land.tight .tm{font-size:14px}
+.sheet.land.tight .scr input{height:20px;width:42px;font-size:13px}.sheet.land.tight .rs{font-size:13px}
 .sheet.land .sh-foot .lg img{height:56px!important}
 .sheet.land .sh-foot .lg div{font-size:26px!important;min-width:0!important}
 
@@ -901,7 +907,12 @@ async function dlPdf(){
   btn.textContent=L.makingPdf;
   const prev=sc.style.transform,prevW=sc.style.width;sc.style.transform='none';
   el.classList.add('land');sc.style.width='1280px';
-  await new Promise(r=>setTimeout(r,60));fitNames();
+  const fitPage=async()=>{await new Promise(r=>setTimeout(r,60));fitNames()};
+  await fitPage();
+  /* one landscape page: drop the notes/logo first, then tighten the rows */
+  const maxH=()=>Math.round(el.offsetWidth/1.4142);
+  if(el.offsetHeight>maxH()){el.classList.add('nofoot');await fitPage()}
+  if(el.offsetHeight>maxH()){el.classList.add('tight');await fitPage()}
   try{
     await document.fonts.ready;
     // inputs render fine in html2canvas; empty ones show as blank boxes
@@ -910,7 +921,7 @@ async function dlPdf(){
       jsPDF:{unit:'px',format:[el.offsetWidth+2,Math.max(el.offsetHeight+2,Math.round(el.offsetWidth/1.4142))],orientation:'landscape',hotfixes:['px_scaling']}}).from(el).save();
     pushDraw();
   }catch(e){alert(L.pdfFail)}
-  el.classList.remove('land');sc.style.width=prevW;sc.style.transform=prev;fitNames();fitSheet();btn.textContent=L.pdf;
+  el.classList.remove('land','nofoot','tight');sc.style.width=prevW;sc.style.transform=prev;fitNames();fitSheet();btn.textContent=L.pdf;
 }
 renderAll();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
