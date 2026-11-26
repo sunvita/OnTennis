@@ -371,16 +371,21 @@ function logLevel(p,old,nw,src){
   S.levelLog.unshift(x);S.levelLog=S.levelLog.slice(0,200);
   cloudMatches(()=>rest('tennis_level_changes',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify([lvRow(x)])}));
 }
-async function pull(){
+async function pull(silent){
   if(!cloud.on||!session||cloud.busy)return;
+  if(silent){ /* background refresh: never while typing, while hidden, or with edits waiting to be sent */
+    const ae=document.activeElement,tg=ae&&ae.tagName;
+    if(document.hidden||!cloud.ready||cloud.timer||(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'))return;
+  }
   /* a draw is on screen: do not touch anything under it (it syncs when you leave) */
   if(S.draw&&S.step>=3){pullDraws();return}
   cloud.busy=true;
   try{
-    setCloud('sync');
+    if(!silent)setCloud('sync');
     if(cloud.ready&&hasUnsynced())await pushState(); /* flush our own edits first; the merge below keeps them even if this fails */
-    const [pl,mt,st,lc]=await Promise.all([rest('tennis_players?select=*&order=id'),rest('tennis_matches?select=*&order=id'),rest('tennis_settings?select=*'),rest('tennis_level_changes?select=*&order=id.desc&limit=200')]);
-    if(!pl.length&&!mt.length&&!st.length){
+    const [pl,mt,st,lc]=await Promise.all([rest('tennis_players?select=*&order=id'),silent?null:rest('tennis_matches?select=*&order=id'),rest('tennis_settings?select=*'),silent?null:rest('tennis_level_changes?select=*&order=id.desc&limit=200')]);
+    if(silent&&!pl.length&&!st.length){cloud.busy=false;setCloud('ok');return}
+    if(!pl.length&&!(mt||[]).length&&!st.length){
       cloud.ready=true;await pushState();
       if(S.history.length)await rest('tennis_matches',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(S.history.map(mRow))});
     }else{
@@ -393,12 +398,13 @@ async function pull(){
       S.players.forEach(lp=>{if(!remoteIds.has(lp.id)&&cloudRows[lp.id]===undefined)next.push(lp)}); /* new here, not on the server yet */
       if(pl.length)S.players=next;
       Object.keys(cloudRows).forEach(k=>delete cloudRows[k]);remote.forEach(rp=>cloudRows[rp.id]=plSig(rp));
-      S.history=(mt||[]).map(m=>({sid:m.sid,date:m.played_on,r:m.r,c:m.c,type:m.type,a:m.a,b:m.b,sa:m.sa,sb:m.sb}));
+      if(mt)S.history=mt.map(m=>({sid:m.sid,date:m.played_on,r:m.r,c:m.c,type:m.type,a:m.a,b:m.b,sa:m.sa,sb:m.sb}));
       const app=(st.find(x=>x.key==='app')||{}).value;
       if(app){const ch=changedKeys(),first=cloudBase==null;SET_KEYS.forEach(k=>{if(k in app&&(first||!ch.includes(k)))S[k]=app[k]});cloudBase=JSON.parse(JSON.stringify(app))}
       normShapes();
-      S.levelLog=(lc||[]).map(x=>({pid:x.player_id,ko:x.player_ko,en:x.player_en,old:+x.old_level,nw:+x.new_level,src:x.source,basis:x.basis,by:x.changed_by,date:x.changed_on}));
+      if(lc)S.levelLog=lc.map(x=>({pid:x.player_id,ko:x.player_ko,en:x.player_en,old:+x.old_level,nw:+x.new_level,src:x.source,basis:x.basis,by:x.changed_by,date:x.changed_on}));
       recompute();
+      if(silent&&localSig()===before){cloud.ready=true;cloud.applying=false;setCloud('ok');cloud.busy=false;if(hasUnsynced())scheduleSync();return}
       if(localSig()!==before)dropDraw(); /* only when someone else really changed players or settings */
       if(!S.draw&&S.step===3)S.step=0;
       cloud.ready=true;renderAll();cloud.applying=false;setCloud('ok');pullDraws();
@@ -963,6 +969,7 @@ document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='En
 document.getElementById('logout').onclick=logout;
 applyGate();
 if(cloud.on&&session)pull();
+setInterval(()=>pull(true),10000); /* pick up other devices' changes every 10 s */
 </script>
 </body>
 </html>
