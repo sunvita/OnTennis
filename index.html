@@ -244,7 +244,7 @@ const S={lang:'ko',step:0,
  nCourts:3,nRounds:7,showTimes:false,extra:false,rOv:{},roundsManual:false,types:['doubles','doubles','doubles','doubles','doubles'],avail:[],cnum:[1,2,3,4,5],cwin:[{from:null,to:null},{from:null,to:null},{from:null,to:null},{from:null,to:null},{from:null,to:null}],defStartMin:300,coach:['','','','',''],lessons:{},
  history:[],levelLog:[],draws:[],operator:'',saveDate:new Date().toISOString().slice(0,10),delIds:[],hold:false,drawId:0,rc:{mode:'last',n:10,month:new Date().toISOString().slice(0,7),from:'',to:'',min:5},startMin:240,endMin:420,roundLenA:30,roundLenB:25,scoring:'ss1',games:5,levelMode:'on',rotate:true,avoidOpp:true,fair:true,club:'On Tennis',title:'',
  draw:null,scores:{},notesCustom:{ko:null,en:null}};
-const BUILD="2026-11-26.5"; /* bump on every release: open copies of the app compare this and refresh themselves */
+const BUILD="2026-11-26.6"; /* bump on every release: open copies of the app compare this and refresh themselves */
 const CFG=window.TENNIS_CFG||{};
 const cloud={on:!!(CFG.url&&CFG.key),st:'off',timer:null,applying:false,last:'',busy:false,ready:false,q:Promise.resolve(),n:0};
 const AUTH_KEY='tennisAuthV1';
@@ -639,9 +639,9 @@ function sheetHTML(){
       if(m&&m.type==='lesson'){
         g+=`<div class="mc lessonc"><div class="lt">${t().lesson}${m.coach?' · '+esc(m.coach):''}</div><div class="lm">${m.members.length?m.members.map(id=>esc(pname(byId(id)))).join(', '):'-'}</div></div>`;
       }else if(m){
-        g+=`<div class="mc"><div class="tm">${nm(m.teams[0],r,c,0)} <i>VS</i> ${nm(m.teams[1],r,c,1)}</div><div class="scr">SCORE ${inp(0)} : ${inp(1)}</div></div>`;
+        g+=`<div class="mc"><div class="tm">${nm(m.teams[0],r,c,0)} <i>VS</i> ${nm(m.teams[1],r,c,1)}</div><div class="scr">${inp(0)} : ${inp(1)}</div></div>`;
       }else{
-        g+=`<div class="mc off"><div class="tm">-</div><div class="scr">SCORE ${inp(0,1)} : ${inp(1,1)}</div></div>`;
+        g+=`<div class="mc off"><div class="tm">-</div><div class="scr">${inp(0,1)} : ${inp(1,1)}</div></div>`;
       }
     }
     g+=`<div class="rs"><div style="text-align:center;line-height:1.5">${rd.rest.length?rd.rest.map((id,i)=>pnSpan(id,r+'|r|0|0|'+i)).join(', '):'-'}</div></div>`;
@@ -957,6 +957,8 @@ async function dlPdf(){
   const btn=$('#pdfBtn'),L=t(),sc=$('#scaler'),el=$('#sheet');
   btn.textContent=L.makingPdf;
   const prev=sc.style.transform,prevW=sc.style.width;sc.style.transform='none';
+  const sy=window.scrollY,sx=window.scrollX;window.scrollTo(0,0); /* html2canvas mis-positions the capture when the page is scrolled (phones) */
+  const wr=document.querySelector('.wrap'),wp=wr.style.padding;wr.style.padding='0'; /* no page gutter, or the capture is shifted on phones */
   el.classList.add('land');sc.style.width='1280px';
   const fitPage=async()=>{await new Promise(r=>setTimeout(r,60));fitNames()};
   await fitPage();
@@ -968,11 +970,11 @@ async function dlPdf(){
     await document.fonts.ready;
     // inputs render fine in html2canvas; empty ones show as blank boxes
     await html2pdf().set({margin:0,filename:L.file,image:{type:'jpeg',quality:.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
       jsPDF:{unit:'px',format:[el.offsetWidth+2,Math.max(el.offsetHeight+2,Math.round(el.offsetWidth/1.4142))],orientation:'landscape',hotfixes:['px_scaling']}}).from(el).save();
     pushDraw();finishSync();
   }catch(e){alert(L.pdfFail)}
-  el.classList.remove('land','nofoot','tight');sc.style.width=prevW;sc.style.transform=prev;fitNames();fitSheet();btn.textContent=L.pdf;
+  el.classList.remove('land','nofoot','tight');sc.style.width=prevW;wr.style.padding=wp;window.scrollTo(sx,sy);sc.style.transform=prev;fitNames();fitSheet();btn.textContent=L.pdf;
 }
 BOOT={};SET_KEYS.forEach(k=>BOOT[k]=JSON.stringify(S[k]));BOOT_ROWS={};S.players.forEach(q=>BOOT_ROWS[q.id]=plSig(q));
 renderAll();
