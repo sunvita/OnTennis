@@ -244,6 +244,7 @@ const S={lang:'ko',step:0,
  nCourts:3,nRounds:7,showTimes:false,extra:false,rOv:{},roundsManual:false,types:['doubles','doubles','doubles','doubles','doubles'],avail:[],cnum:[1,2,3,4,5],cwin:[{from:null,to:null},{from:null,to:null},{from:null,to:null},{from:null,to:null},{from:null,to:null}],defStartMin:300,coach:['','','','',''],lessons:{},
  history:[],levelLog:[],draws:[],operator:'',saveDate:new Date().toISOString().slice(0,10),delIds:[],hold:false,drawId:0,rc:{mode:'last',n:10,month:new Date().toISOString().slice(0,7),from:'',to:'',min:5},startMin:240,endMin:420,roundLenA:30,roundLenB:25,scoring:'ss1',games:5,levelMode:'on',rotate:true,avoidOpp:true,fair:true,club:'On Tennis',title:'',
  draw:null,scores:{},notesCustom:{ko:null,en:null}};
+const BUILD="2026-11-26.5"; /* bump on every release: open copies of the app compare this and refresh themselves */
 const CFG=window.TENNIS_CFG||{};
 const cloud={on:!!(CFG.url&&CFG.key),st:'off',timer:null,applying:false,last:'',busy:false,ready:false,q:Promise.resolve(),n:0};
 const AUTH_KEY='tennisAuthV1';
@@ -789,7 +790,7 @@ function renderPanel(){
     <div class="row"><label>${L.sheetTitle}</label><input type="text" value="${esc(S.title)}" placeholder="${L.drawTitle}" oninput="S.title=this.value"></div>
     <div class="row"><label>${L.club}</label><input type="text" value="${esc(S.club)}" oninput="S.club=this.value"></div>
     <div class="row" style="align-items:flex-start"><label>${L.notesLbl}</label><div style="flex:1;min-width:240px"><textarea id="notesTa" rows="5" style="width:100%;border:1px solid #b8c1d6;border-radius:8px;padding:8px 10px;font:inherit" oninput="setNotes(this.value)">${esc(notesFor().join('\n'))}</textarea><p class="hint" style="margin:4px 0 6px">${L.notesHint}</p><button class="btn" onclick="resetNotes()">${L.resetNotes}</button></div></div></div>
-    ${cloud.on&&session?`<div class="card"><h2>${L.acct}</h2>
+    ${cloud.on&&session?`<div class="card"><h2>${L.acct}</h2><p class="note">v${BUILD}</p>
     <div class="row"><label>${L.pwCur}</label><input type="password" id="pwCur" autocomplete="current-password"></div>
     <div class="row"><label>${L.pwNew}</label><input type="password" id="pwNew" autocomplete="new-password"></div>
     <div class="row"><label>${L.pwNew2}</label><input type="password" id="pwNew2" autocomplete="new-password"></div>
@@ -984,6 +985,19 @@ document.getElementById('logout').onclick=logout;
 applyGate();
 if(cloud.on&&session)pull();
 setInterval(()=>pull(true),10000); /* pick up other devices' changes every 10 s */
+/* an old copy of the app left open (esp. a home-screen app) can overwrite newer data: detect and refresh */
+async function checkBuild(){
+  try{
+    const r=await fetch(location.href.split('#')[0].split('?')[0]+'?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+    const m=(await r.text()).match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
+    const ae=document.activeElement,tg=ae&&ae.tagName,busy=S.hold||(S.draw&&S.step>=3)||tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT';
+    if(!busy&&!document.hidden){location.reload();return}
+    let b=document.getElementById('updBanner');
+    if(!b){b=document.createElement('div');b.id='updBanner';b.className='noprint';b.style.cssText='position:sticky;top:0;z-index:50;background:#fff3c4;border-bottom:2px solid #e3b341;padding:10px 14px;font-weight:700;text-align:center';document.body.prepend(b)}
+    b.innerHTML=(S.lang==='ko'?'새 버전이 있습니다. 작성을 마친 뒤 ':'A new version is available. When you are done, ')+'<button class="btn pri" onclick="location.reload()">'+(S.lang==='ko'?'새로고침':'Reload')+'</button>';
+  }catch(e){}
+}
+setInterval(checkBuild,30000);setTimeout(checkBuild,3000);
 </script>
 </body>
 </html>
