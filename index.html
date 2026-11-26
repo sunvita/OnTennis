@@ -259,7 +259,7 @@ async function authReq(path,method,body,token){
 function setSession(j){session={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Math.floor(Date.now()/1000)+(j.expires_in||3600)};try{localStorage.setItem(AUTH_KEY,JSON.stringify(session))}catch(e){}}
 async function refreshSession(){if(!session)return false;try{setSession(await authReq('token?grant_type=refresh_token','POST',{refresh_token:session.refresh_token}));return true}catch(e){return false}}
 async function ensureFresh(){if(session&&session.expires_at-Math.floor(Date.now()/1000)<60){if(!(await refreshSession())){logout();throw new Error('session expired')}}}
-function logout(){session=null;try{localStorage.removeItem(AUTH_KEY);localStorage.removeItem(KEY)}catch(e){}location.reload()}
+function logout(){session=null;try{localStorage.removeItem(AUTH_KEY);localStorage.removeItem(KEY);localStorage.removeItem('tennisCloudV1')}catch(e){}location.reload()}
 const adminEmail=()=>CFG.adminEmail||'admin@ontennis.app';
 async function rest(path,opt={},retry=true){
   await ensureFresh();
@@ -313,7 +313,10 @@ function scheduleSync(){
 const plRow=p=>({id:p.id,ko:p.ko,en:p.en,level:p.level,start_min:300,from_round:p.from==null?null:p.from,to_round:p.to==null?null:p.to,rounds:p.rounds||null,aliases:p.aliases&&p.aliases.length?p.aliases:null,custom:!!p.custom,sel:!!p.sel});
 const localSig=()=>{const st={};SET_KEYS.forEach(k=>st[k]=S[k]);return JSON.stringify([S.players.map(plRow),st])};
 /* sync keeps what the server last told us, so we only send what THIS device changed and never delete other devices' work */
-const cloudRows={};let cloudBase=null;
+const cloudRows={};let cloudBase=null,BOOT=null,BOOT_ROWS={};
+const CKEY='tennisCloudV1';
+try{const c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c){cloudBase=c.base||null;Object.assign(cloudRows,c.rows||{})}}catch(e){}
+const persistCloud=()=>{try{localStorage.setItem(CKEY,JSON.stringify({base:cloudBase,rows:cloudRows}))}catch(e){}};
 const plSig=p=>JSON.stringify(plRow(p));
 const changedKeys=()=>cloudBase?SET_KEYS.filter(k=>JSON.stringify(S[k])!==JSON.stringify(cloudBase[k])):SET_KEYS.slice();
 const hasUnsynced=()=>(S.delIds||[]).length>0||S.players.some(p=>cloudRows[p.id]!==plSig(p))||changedKeys().length>0;
@@ -337,7 +340,7 @@ async function doPush(){
       await rest('tennis_settings?on_conflict=key',{method:'POST',headers:up,body:JSON.stringify([{key:'app',value:merged,updated_at:new Date().toISOString()}])});
       cloudBase=JSON.parse(JSON.stringify(merged));
     }
-    persist();setCloud('ok');
+    persist();persistCloud();setCloud('ok');
   }catch(e){console.warn('sync',e);setCloud('err')}
 }
 const mRow=h=>({sid:String(h.sid),played_on:h.date,r:h.r||0,c:h.c||0,type:h.type||'doubles',a:h.a,b:h.b,sa:h.sa,sb:h.sb});
@@ -394,20 +397,20 @@ async function pull(silent){
       const remote=pl.map(p=>({id:p.id,ko:p.ko,en:p.en,level:+p.level,start:300,from:(p.from_round!=null?p.from_round:(p.start_min!==300?firstRoundAtOrAfter(p.start_min):null)),to:p.to_round,rounds:p.rounds,aliases:p.aliases||null,custom:p.custom,sel:p.sel}));
       const del=new Set(S.delIds||[]),local=new Map(S.players.map(q=>[q.id,q])),remoteIds=new Set(remote.map(q=>q.id));
       const next=[];
-      remote.forEach(rp=>{if(del.has(rp.id))return;const lp=local.get(rp.id);next.push(lp&&cloudRows[rp.id]!==undefined&&plSig(lp)!==cloudRows[rp.id]?lp:rp)}); /* keep our unsynced edits */
+      remote.forEach(rp=>{if(del.has(rp.id))return;const lp=local.get(rp.id);const base=cloudRows[rp.id]!==undefined?cloudRows[rp.id]:BOOT_ROWS[rp.id];next.push(lp&&base!==undefined&&plSig(lp)!==base?lp:rp)}); /* keep our unsynced edits */
       S.players.forEach(lp=>{if(!remoteIds.has(lp.id)&&cloudRows[lp.id]===undefined)next.push(lp)}); /* new here, not on the server yet */
       if(pl.length)S.players=next;
       Object.keys(cloudRows).forEach(k=>delete cloudRows[k]);remote.forEach(rp=>cloudRows[rp.id]=plSig(rp));
       if(mt)S.history=mt.map(m=>({sid:m.sid,date:m.played_on,r:m.r,c:m.c,type:m.type,a:m.a,b:m.b,sa:m.sa,sb:m.sb}));
       const app=(st.find(x=>x.key==='app')||{}).value;
-      if(app){const ch=changedKeys(),first=cloudBase==null;SET_KEYS.forEach(k=>{if(k in app&&(first||!ch.includes(k)))S[k]=app[k]});cloudBase=JSON.parse(JSON.stringify(app))}
+      if(app){const ch=cloudBase==null?SET_KEYS.filter(k=>BOOT&&JSON.stringify(S[k])!==BOOT[k]):changedKeys();SET_KEYS.forEach(k=>{if(k in app&&!ch.includes(k))S[k]=app[k]});cloudBase=JSON.parse(JSON.stringify(app))}
       normShapes();
       if(lc)S.levelLog=lc.map(x=>({pid:x.player_id,ko:x.player_ko,en:x.player_en,old:+x.old_level,nw:+x.new_level,src:x.source,basis:x.basis,by:x.changed_by,date:x.changed_on}));
       recompute();
       if(silent&&localSig()===before){cloud.ready=true;cloud.applying=false;setCloud('ok');cloud.busy=false;if(hasUnsynced())scheduleSync();return}
       if(localSig()!==before)dropDraw(); /* only when someone else really changed players or settings */
       if(!S.draw&&S.step===3)S.step=0;
-      cloud.ready=true;renderAll();cloud.applying=false;setCloud('ok');pullDraws();
+      cloud.ready=true;persistCloud();renderAll();cloud.applying=false;setCloud('ok');pullDraws();
       if(hasUnsynced())scheduleSync();
     }
   }catch(e){console.warn('sync',e);cloud.applying=false;setCloud('err')}
@@ -842,7 +845,7 @@ function renderAll(){
 }
 
 /* ---------- actions ---------- */
-function go(i){S.step=i;if(i===3)pullDraws();if(i===3&&!S.draw){if(!doGen())return}renderAll();window.scrollTo({top:0})}
+function go(i){S.step=i;if(i<3&&cloud.on&&session&&!cloud.ready)setTimeout(()=>pull(),0);if(i===3)pullDraws();if(i===3&&!S.draw){if(!doGen())return}renderAll();window.scrollTo({top:0})}
 function doGen(){
   const L=t();
   if(selPlayers().length<2){S.step=1;renderAll();$('#err').textContent=L.needPlayers;return false}
@@ -960,6 +963,7 @@ async function dlPdf(){
   }catch(e){alert(L.pdfFail)}
   el.classList.remove('land','nofoot','tight');sc.style.width=prevW;sc.style.transform=prev;fitNames();fitSheet();btn.textContent=L.pdf;
 }
+BOOT={};SET_KEYS.forEach(k=>BOOT[k]=JSON.stringify(S[k]));BOOT_ROWS={};S.players.forEach(q=>BOOT_ROWS[q.id]=plSig(q));
 renderAll();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 document.getElementById('cloud').onclick=()=>{if(cloud.on&&session){cloud.busy=false;pushState().then(pull)}};
